@@ -3,6 +3,17 @@
 Alle wichtigen Änderungen an diesem Projekt werden hier dokumentiert.
 Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/), Versionen folgen [Semantic Versioning](https://semver.org/lang/de/).
 
+## [1.1.1] - 2026-10-20
+
+### Behoben
+- **Dienst startete nach Neuinstallation oft nicht**: Das von GitHub gebaute Setup (1.0.0 und 1.1.0) enthielt eine fehlerhafte Datenbank-Bibliothek, durch die der Server in etwa 4 von 5 Starts sofort abstürzte. Nach drei Fehlversuchen blieb der Dienst gestoppt. `better-sqlite3` auf Version 13 aktualisiert (stabile N-API-Schnittstelle, Binärdatei direkt im Paket).
+
+### Geändert
+- Release-Build verwendet eine fest vorgegebene Node-Version (`.node-version`).
+- Neuer **Starttest im Build**: Das fertige Paket wird fünfmal mit der mitgelieferten Node-Laufzeit gestartet; scheitert ein Start, wird kein Release veröffentlicht.
+
+---
+
 ## [1.1.0] - 2026-10-20
 
 ### Entfernt

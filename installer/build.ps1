@@ -97,6 +97,47 @@ New-Item -ItemType Directory -Force -Path (Join-Path $stage "node") | Out-Null
 Copy-Item $nodeExe (Join-Path $stage "node\node.exe")
 Copy-Item $nodeLicense (Join-Path $stage "node\LICENSE.txt")
 
+# -- Starttest: fertiges Paket mehrfach starten -------------------------------
+# Faengt Fehler ab, die nur im gebauten Paket auftreten (z. B. defekte native
+# Module). Ein einziger fehlgeschlagener Start bricht den Build ab.
+Step "Starttest (5 Starts mit mitgelieferter Node-Laufzeit)"
+$stageNode = Join-Path $stage "node\node.exe"
+$smoke = Join-Path $buildDir "smoke"
+Remove-Item -Recurse -Force $smoke -ErrorAction SilentlyContinue
+New-Item -ItemType Directory -Force -Path $smoke | Out-Null
+$smokePort = 38799
+$smokeEnv = Join-Path $smoke "smoke.env"
+@(
+    "PORT=$smokePort", "HOST=127.0.0.1", "NODE_ENV=production", "JWT_SECRET=$('s' * 48)",
+    "DB_FILE=$smoke\smoke.sqlite", "UPLOAD_DIR=$smoke\uploads", "LOG_DIR=$smoke\logs"
+) | Set-Content -Path $smokeEnv -Encoding ASCII
+$env:DOTENV_CONFIG_PATH = $smokeEnv
+try {
+    & $stageNode (Join-Path $stBackend "dist\scripts\init-db.js") | Out-Null
+    if ($LASTEXITCODE -ne 0) { throw "init-db im Starttest fehlgeschlagen (Code $LASTEXITCODE)" }
+    for ($i = 1; $i -le 5; $i++) {
+        $proc = Start-Process -FilePath $stageNode -ArgumentList "`"$stBackend\dist\server.js`"" -WorkingDirectory $stBackend `
+            -PassThru -NoNewWindow -RedirectStandardOutput "$smoke\out$i.log" -RedirectStandardError "$smoke\err$i.log"
+        $ok = $false
+        for ($t = 0; $t -lt 60; $t++) {
+            Start-Sleep -Milliseconds 500
+            if ($proc.HasExited) { break }
+            try {
+                $health = Invoke-RestMethod -Uri "http://127.0.0.1:$smokePort/api/health" -TimeoutSec 2
+                if ($health.version -eq $version) { $ok = $true; break }
+            } catch { }
+        }
+        if (-not $proc.HasExited) { Stop-Process -Id $proc.Id -Force; $proc.WaitForExit() }
+        if (-not $ok) {
+            Get-Content "$smoke\err$i.log" -ErrorAction SilentlyContinue | Select-Object -First 15 | ForEach-Object { Write-Host "    $_" }
+            throw "Starttest $i von 5 fehlgeschlagen - Paket startet nicht zuverlaessig"
+        }
+        Write-Host "    Start $i OK"
+    }
+} finally {
+    Remove-Item Env:DOTENV_CONFIG_PATH -ErrorAction SilentlyContinue
+}
+
 # -- Windows-Dienst (WinSW) ---------------------------------------------------
 Step "WinSW $WinSwVersion"
 $winsw = Get-Cached "https://github.com/winsw/winsw/releases/download/$WinSwVersion/WinSW-x64.exe" "WinSW-$WinSwVersion-x64.exe"
