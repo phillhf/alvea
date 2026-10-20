@@ -10,6 +10,7 @@ Erste öffentliche Version unter dem neuen Namen **Alvea** (vorher *OpenClinic*,
 - **Windows-Installer** (`Alvea-Setup-x.y.z.exe`): Assistent mit Installationsordner, Port, Firewall-Freigabe und Übernahme einer bestehenden OpenClinic-Installation. Node.js-Laufzeit ist enthalten, auf dem Server muss nichts vorinstalliert sein. Alvea läuft als Windows-Dienst „Alvea“.
 - **Update über GitHub-Releases**: neuer Tab *Verwaltung → ⬆️ Update* zeigt installierte und neueste Version mit Änderungen und aktualisiert per Knopfdruck. Alternativ Startmenü → *Nach Updates suchen*. Downloads werden per SHA256 geprüft, die Datenbank wird vor jedem Update gesichert.
 - `/api/health` liefert die installierte Version.
+- **Benutzer- und Installationshandbuch** komplett überarbeitet (`docs/Alvea_Benutzerhandbuch.pdf`): Installation per Setup, Updates, Umstieg von OpenClinic, alle 22 Berechtigungen, Raumbuchung, neuer Rücksendungs-Ablauf, Wäsche und Chat.
 
 ### Geändert
 - Umbenennung in **Alvea** (App-Name, Titel, Manifest, Dienst, Standard-Login `admin@alvea.local`). Bestehende Logins (`admin@openclinic.local`, `admin@bettenaufbereitung.local`) gelten weiter.

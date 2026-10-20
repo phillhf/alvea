@@ -90,12 +90,13 @@ Das Backend lädt die Konfiguration über `dotenv`. Bei Installation per Setup s
 
 1. Version in `backend/package.json` **und** `frontend/package.json` erhöhen (beide gleich), `npm install --package-lock-only` in beiden Ordnern.
 2. Abschnitt `## [X.Y.Z] - JJJJ-MM-TT` im `CHANGELOG.md` anlegen – er wird zum Release-Text.
-3. Committen, taggen, pushen:
+3. Handbuch neu erzeugen, falls sich Funktionen geändert haben: `pip install reportlab`, dann `python scripts/make_handbuch.py` (Version wird aus `backend/package.json` übernommen).
+4. Committen, taggen, pushen:
    ```bash
    git tag vX.Y.Z
    git push origin main vX.Y.Z
    ```
-4. GitHub Actions (`release.yml`) baut `Alvea-Setup-X.Y.Z.exe` + `.sha256` und veröffentlicht das Release. Installierte Server sehen das Update danach unter *Verwaltung → ⬆️ Update*.
+5. GitHub Actions (`release.yml`) baut `Alvea-Setup-X.Y.Z.exe` + `.sha256` und veröffentlicht das Release. Installierte Server sehen das Update danach unter *Verwaltung → ⬆️ Update*.
 
 Setup lokal bauen (z. B. zum Testen):
 

@@ -1,640 +1,662 @@
 #!/usr/bin/env python3
-"""Benutzerhandbuch Betten & Entlassreinigung v4.0"""
+"""Benutzer- und Installationshandbuch Alvea
 
-from reportlab.lib.pagesizes import A4
-from reportlab.lib.units import mm
+Erzeugt docs/Alvea_Benutzerhandbuch.pdf.
+
+    pip install reportlab
+    python scripts/make_handbuch.py
+
+Unter Windows wird Arial verwendet (Umlaute, Pfeile), sonst Helvetica.
+Handbuch-Version = Programmversion aus backend/package.json.
+"""
+
+import json
+import os
+import re
+from datetime import date
+
 from reportlab.lib import colors
+from reportlab.lib.enums import TA_CENTER
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.styles import ParagraphStyle
+from reportlab.lib.units import mm
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.platypus import (
-    SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle,
-    PageBreak, HRFlowable
+    HRFlowable, KeepTogether, PageBreak, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle,
 )
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_RIGHT
 
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+with open(os.path.join(ROOT, "backend", "package.json"), encoding="utf-8") as f:
+    VERSION = json.load(f)["version"]
+STAND = date.today().strftime("%d.%m.%Y")
+OUT = os.path.join(ROOT, "docs", "Alvea_Benutzerhandbuch.pdf")
+
+# ── Schriften ────────────────────────────────────────────────────────────────
+FONT, FONT_B, FONT_I = "Helvetica", "Helvetica-Bold", "Helvetica-Oblique"
+_win = os.path.join(os.environ.get("WINDIR", r"C:\Windows"), "Fonts")
+if os.path.exists(os.path.join(_win, "arial.ttf")):
+    pdfmetrics.registerFont(TTFont("Arial", os.path.join(_win, "arial.ttf")))
+    pdfmetrics.registerFont(TTFont("Arial-Bold", os.path.join(_win, "arialbd.ttf")))
+    pdfmetrics.registerFont(TTFont("Arial-Italic", os.path.join(_win, "ariali.ttf")))
+    FONT, FONT_B, FONT_I = "Arial", "Arial-Bold", "Arial-Italic"
+
+# ── Farben (Fluent-Palette der App) ─────────────────────────────────────────
 W, H = A4
-BRAND = colors.HexColor("#2563eb")
-BRAND_LIGHT = colors.HexColor("#eff6ff")
-SLATE = colors.HexColor("#334155")
-MUTED = colors.HexColor("#64748b")
-BORDER = colors.HexColor("#e2e8f0")
-GREEN = colors.HexColor("#16a34a")
-AMBER = colors.HexColor("#d97706")
-RED   = colors.HexColor("#dc2626")
+BRAND = colors.HexColor("#0078D4")
+BRAND_LIGHT = colors.HexColor("#EFF6FC")
+SLATE = colors.HexColor("#323130")
+MUTED = colors.HexColor("#605E5C")
+BORDER = colors.HexColor("#E1DFDD")
 
-styles = getSampleStyleSheet()
 
 def S(name, **kw):
+    kw.setdefault("fontName", FONT)
     return ParagraphStyle(name, **kw)
 
-cover_title  = S("CoverTitle",  fontSize=32, leading=38, textColor=BRAND,    fontName="Helvetica-Bold",  alignment=TA_CENTER)
-cover_sub    = S("CoverSub",    fontSize=14, leading=20, textColor=SLATE,     fontName="Helvetica",       alignment=TA_CENTER)
-cover_meta   = S("CoverMeta",   fontSize=10, leading=14, textColor=MUTED,     fontName="Helvetica",       alignment=TA_CENTER)
-h1           = S("H1",          fontSize=18, leading=24, textColor=BRAND,     fontName="Helvetica-Bold",  spaceAfter=4)
-h2           = S("H2",          fontSize=13, leading=18, textColor=SLATE,     fontName="Helvetica-Bold",  spaceAfter=2, spaceBefore=10)
-h3           = S("H3",          fontSize=11, leading=15, textColor=SLATE,     fontName="Helvetica-Bold",  spaceAfter=2, spaceBefore=6)
-body         = S("Body",        fontSize=9,  leading=13, textColor=SLATE,     fontName="Helvetica")
-body_small   = S("BodySmall",   fontSize=8,  leading=11, textColor=MUTED,     fontName="Helvetica")
-note         = S("Note",        fontSize=8,  leading=12, textColor=SLATE,     fontName="Helvetica",       leftIndent=8, backColor=BRAND_LIGHT)
-toc_item     = S("TocItem",     fontSize=10, leading=14, textColor=SLATE,     fontName="Helvetica",       leftIndent=0)
-toc_sub      = S("TocSub",      fontSize=9,  leading=13, textColor=MUTED,     fontName="Helvetica",       leftIndent=12)
-footer_s     = S("Footer",      fontSize=7,  leading=10, textColor=MUTED,     fontName="Helvetica",       alignment=TA_CENTER)
 
-def tbl(data, col_widths, row_styles=None):
-    t = Table(data, colWidths=col_widths)
-    base = [
-        ("BACKGROUND", (0,0), (-1,0), BRAND),
-        ("TEXTCOLOR",  (0,0), (-1,0), colors.white),
-        ("FONTNAME",   (0,0), (-1,0), "Helvetica-Bold"),
-        ("FONTSIZE",   (0,0), (-1,-1), 8),
-        ("LEADING",    (0,0), (-1,-1), 11),
-        ("ROWBACKGROUNDS", (0,1), (-1,-1), [colors.white, BRAND_LIGHT]),
-        ("GRID",       (0,0), (-1,-1), 0.3, BORDER),
-        ("VALIGN",     (0,0), (-1,-1), "TOP"),
-        ("LEFTPADDING",(0,0), (-1,-1), 6),
-        ("RIGHTPADDING",(0,0),(-1,-1), 6),
-        ("TOPPADDING", (0,0), (-1,-1), 4),
-        ("BOTTOMPADDING",(0,0),(-1,-1), 4),
-    ]
-    if row_styles:
-        base.extend(row_styles)
-    t.setStyle(TableStyle(base))
+cover_title = S("CoverTitle", fontSize=40, leading=46, textColor=BRAND, fontName=FONT_B, alignment=TA_CENTER)
+cover_sub = S("CoverSub", fontSize=15, leading=21, textColor=SLATE, alignment=TA_CENTER)
+cover_meta = S("CoverMeta", fontSize=10, leading=14, textColor=MUTED, alignment=TA_CENTER)
+h1 = S("H1", fontSize=18, leading=24, textColor=BRAND, fontName=FONT_B, spaceAfter=4)
+h2 = S("H2", fontSize=12.5, leading=17, textColor=SLATE, fontName=FONT_B, spaceAfter=3, spaceBefore=9)
+body = S("Body", fontSize=9, leading=13, textColor=SLATE)
+note = S("Note", fontSize=8.5, leading=12, textColor=SLATE, leftIndent=6, rightIndent=6,
+         backColor=BRAND_LIGHT, borderPadding=(5, 6, 5, 6), spaceBefore=4, spaceAfter=4)
+toc_item = S("TocItem", fontSize=10.5, leading=16, textColor=SLATE)
+cell = S("Cell", fontSize=8, leading=11, textColor=SLATE)
+cell_head = S("CellHead", fontSize=8, leading=11, textColor=colors.white, fontName=FONT_B)
+
+P = Paragraph
+SP = lambda n: Spacer(1, n * mm)
+HR = lambda: HRFlowable(width="100%", thickness=0.5, color=BORDER, spaceAfter=5)
+
+
+def esc(text):
+    """Einzelnes & für ReportLab-Markup maskieren (bereits maskierte Entities bleiben)."""
+    return re.sub(r"&(?!(amp|lt|gt|nbsp|quot);)", "&amp;", str(text))
+
+
+def tbl(data, col_widths):
+    """Tabelle mit Kopfzeile; Zellen werden umbrochen."""
+    rows = [[P(esc(c), cell_head) for c in data[0]]]
+    rows += [[P(esc(c), cell) for c in r] for r in data[1:]]
+    t = Table(rows, colWidths=col_widths, repeatRows=1)
+    t.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, 0), BRAND),
+        ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, BRAND_LIGHT]),
+        ("GRID", (0, 0), (-1, -1), 0.3, BORDER),
+        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+        ("LEFTPADDING", (0, 0), (-1, -1), 5),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 5),
+        ("TOPPADDING", (0, 0), (-1, -1), 3),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 3),
+    ]))
     return t
 
-def page_num(canvas, doc):
+
+def page_deco(canvas, doc):
     canvas.saveState()
     canvas.setFillColor(MUTED)
-    canvas.setFont("Helvetica", 7)
-    canvas.drawCentredString(W/2, 10*mm,
-        f"Betten & Entlassreinigung – Internes Tool  ·  Stand 29.05.2026  ·  v4.0     Seite {doc.page}")
+    canvas.setFont(FONT, 7)
+    if doc.page > 1:
+        canvas.drawCentredString(W / 2, 10 * mm, f"Alvea {VERSION}  ·  Benutzer- und Installationshandbuch  ·  Stand {STAND}  ·  Seite {doc.page}")
     canvas.restoreState()
 
-OUT = "/mnt/user-data/outputs/Benutzerhandbuch_Betten_Entlassreinigung_v4_0.pdf"
-
-doc = SimpleDocTemplate(
-    OUT, pagesize=A4,
-    leftMargin=20*mm, rightMargin=20*mm,
-    topMargin=18*mm,  bottomMargin=18*mm,
-)
 
 story = []
-P = Paragraph
-SP = lambda n: Spacer(1, n*mm)
-HR = lambda: HRFlowable(width="100%", thickness=0.5, color=BORDER, spaceAfter=4)
+FULL = 170 * mm
 
-# ── COVER ──────────────────────────────────────────────────────────────────────
+# ── Deckblatt ────────────────────────────────────────────────────────────────
 story += [
-    SP(20),
-    P("Betten &amp;<br/>Entlassreinigung", cover_title),
+    SP(55),
+    P("Alvea", cover_title),
     SP(6),
     P("Benutzer- und Installationshandbuch", cover_sub),
-    SP(4),
-    P("Version 4.0  |  Stand 29.05.2026", cover_meta),
+    SP(3),
+    P("Bettenaufbereitung · Zimmerreinigung · Sauerstoff · Rücksendungen · Wäsche · Spinde · Raumbuchung", cover_meta),
+    SP(14),
+    P(f"Programmversion {VERSION}  ·  Stand {STAND}", cover_meta),
     SP(2),
-    P("Einsatz: Windows-Server im Krankenhausnetz (intern)", cover_meta),
-    SP(1),
-    P("Internes Tool – kein externer Zugriff vorgesehen", cover_meta),
+    P("github.com/phillhf/alvea", cover_meta),
     PageBreak(),
 ]
 
-# ── INHALTSVERZEICHNIS ──────────────────────────────────────────────────────────
-story += [P("Inhaltsverzeichnis", h1), SP(3)]
-toc_data = [
-    ("1.", "Programmübersicht",                   "3"),
-    ("2.", "Installation",                        "4"),
-    ("3.", "Rollen & Berechtigungen (16)",        "5"),
-    ("4.", "Erste Schritte",                      "7"),
-    ("5.", "Benutzeroberfläche & Navigation",     "8"),
-    ("6.", "Stationsübersicht – Dezentrale Bettenaufbereitung","9"),
-    ("7.", "Bett-Zentral",                        "10"),
-    ("8.", "Scheuer-Wisch",                       "10"),
-    ("9.", "Meine Station (Pflegepersonal)",      "11"),
-    ("10.","Dashboard – Schichtleiter",           "13"),
-    ("11.","Meldungen",                           "13"),
-    ("12.","Instandsetzung – Defektmanagement",   "14"),
-    ("13.","Bettenstamm",                         "15"),
-    ("14.","Betten P&W – Prüfung & Wartung",     "15"),
-    ("15.","Spindverwaltung",                     "16"),
-    ("16.","Raumbuch",                            "17"),
-    ("17.","Sauerstofftransport",                 "18"),
-    ("18.","Rücksendungen",                       "20"),
-    ("19.","Verwaltung",                          "21"),
-    ("20.","Berichte",                            "22"),
-    ("21.","Sicherheit & Datensicherung",         "23"),
-    ("22.","Konfiguration",                       "24"),
-    ("23.","Häufige Fragen",                      "25"),
+# ── Inhaltsverzeichnis ───────────────────────────────────────────────────────
+CHAPTERS = [
+    "Programmübersicht", "Installation", "Updates", "Umstieg von OpenClinic",
+    "Rollen & Berechtigungen", "Erste Schritte", "Benutzeroberfläche & Navigation",
+    "Bettenaufbereitung (dezentral)", "Bett-Zentral", "Scheuer-Wisch",
+    "Meine Station (Pflegepersonal)", "Dashboard", "Meldungen", "Instandsetzung",
+    "Bettenstamm und Betten P&W", "Spindverwaltung", "Raumbuch", "Raumbuchung",
+    "Sauerstofftransport", "Rücksendungen", "Kissen & Bettdecken", "Stations-Chat",
+    "Verwaltung", "Berichte", "Sicherheit & Datensicherung", "Konfiguration", "Häufige Fragen",
 ]
-for nr, title, pg in toc_data:
-    story.append(P(f"{nr}&nbsp;&nbsp;{title}", toc_item))
+story += [P("Inhaltsverzeichnis", h1), HR()]
+for i, title in enumerate(CHAPTERS, 1):
+    story.append(P(f"{i}.&nbsp;&nbsp;{title.replace('&', '&amp;')}", toc_item))
 story.append(PageBreak())
 
-# ── 1. PROGRAMMÜBERSICHT ────────────────────────────────────────────────────────
-story += [P("1. Programmübersicht", h1), HR()]
-story += [P("Betten &amp; Entlassreinigung ist ein webbasiertes Tool für die digitale Verwaltung von Bettenaufbereitung, Zimmerreinigung, Sauerstofflogistik und Lagerrücksendungen in Krankenhäusern. Es läuft vollständig auf einem Windows-Server im internen Netzwerk.", body), SP(3)]
+chapter_no = 0
 
-story += [P("1.1 Hauptfunktionen", h2)]
+
+def chapter(title, new_page=False):
+    global chapter_no
+    chapter_no += 1
+    assert CHAPTERS[chapter_no - 1] == title, (chapter_no, title)
+    items = [P(f"{chapter_no}. {title.replace('&', '&amp;')}", h1), HR()]
+    story.append(PageBreak() if new_page else SP(5))
+    story.extend(items)
+
+
+# ── 1. Programmübersicht ─────────────────────────────────────────────────────
+chapter("Programmübersicht")
+story += [P("Alvea ist eine Web-Anwendung für die Logistik im Krankenhaus. Sie läuft als Windows-Dienst auf einem Server im internen "
+            "Netz und wird per Browser genutzt – am PC ebenso wie auf iPad oder Smartphone. Alle Module lassen sich unter "
+            "<b>Verwaltung → Module</b> einzeln ein- und ausschalten.", body), SP(3)]
 story.append(tbl([
-    ["Funktion", "Beschreibung"],
-    ["Stationsübersicht",  "Aufträge für normale und infektiöse Bettenaufbereitung"],
-    ["Bett-Zentral",       "Zentrale Aufbereitung mit Barcode-Pflicht, ISO-Flag"],
-    ["Scheuer-Wisch",      "Entlassreinigung und Schlussdesinfektion"],
-    ["Meine Station",      "Pflegepersonal: Reinigung, Defekte, Sauerstoff, Rücksendungen"],
-    ["Meldungen",          "Team-Meldungen und Ankündigungen mit Priorität"],
-    ["Instandsetzung",     "Defektmanagement: Meldung, Reparatur, Abschluss"],
-    ["Bettenstamm",        "Physische Bettenverwaltung mit Barcode"],
-    ["Betten P&W",         "Prüfung & Wartung: Übersicht + P&W durchführen"],
-    ["Spindverwaltung",    "Spinde verwalten, Anfragen bearbeiten"],
-    ["Raumbuch",           "Raumverwaltung mit Excel-Import"],
-    ["Sauerstofftransport","Wareneingang, Anfragen, Lieferung, Leergut, Warenausgang"],
-    ["Rücksendungen",      "Material-Rücksendungen von Stationen ans Lager"],
-    ["Dashboard",          "Schichtleiter-Übersicht aller Stationen"],
-    ["Berichte",           "PDF-Export: Stationsberichte, Zentral, Sauerstoff"],
-    ["Rollen & Berechtigungen", "16 frei konfigurierbare Berechtigungen"],
-    ["PWA / Homescreen",   "Installierbar als App auf iPad, Smartphone"],
-], [30*mm, 130*mm]))
-story.append(PageBreak())
+    ["Modul", "Beschreibung"],
+    ["Bettenaufbereitung", "Dezentrale Aufträge auf Station, Normal- und Infektiösmodus, Checklisten, Fotos, Prioritätsscore"],
+    ["Bett-Zentral", "Zentrale Aufbereitung mit Barcode-Pflicht, ISO-Kennzeichnung und Desinfektionsmaßnahmen"],
+    ["Scheuer-Wisch", "Entlassreinigung und Schlussdesinfektion von Zimmern"],
+    ["Meine Station", "Startseite für Pflegepersonal: Aufträge, Defekte, Sauerstoff, Rücksendungen, Wäsche, Spinde anfordern"],
+    ["Dashboard", "Schichtleiter-Übersicht aller Stationen mit Handlungsbedarf"],
+    ["Meldungen", "Ankündigungen mit Priorität, Gültigkeitszeitraum und Archiv"],
+    ["Instandsetzung", "Defektmeldungen für Betten mit Reparatur-Workflow"],
+    ["Bettenstamm / Betten P&W", "Physische Betten mit Barcode, Prüftermine und Wartung"],
+    ["Spindverwaltung", "Spinde, Spind-Anfragen, Vergabe und Historie"],
+    ["Raumbuch", "Haus → Gebäude → Station/Bereich → Raum → Stellplatz, inklusive Excel-Import"],
+    ["Raumbuchung", "Gemeinsam genutzte Räume und Arbeitsplätze buchen, Stellvertretung, Favoriten"],
+    ["Sauerstofftransport", "Flaschenlogistik vom Wareneingang bis zur Rückgabe an den Lieferanten"],
+    ["Rücksendungen", "Material-Rücksendungen von Station über Lager und Einkauf bis zum Abschluss"],
+    ["Kissen & Bettdecken", "Wäsche-Anfragen der Stationen"],
+    ["Stations-Chat", "Gemeinsamer Chat für alle Stationen"],
+    ["Berichte", "Auswertungen und PDF-Export"],
+], [42 * mm, 128 * mm]))
+story += [SP(3), P("Alvea kann auf iPad und Smartphone wie eine App auf den Home-Bildschirm gelegt werden (PWA). "
+                   "Bei WLAN-Ausfall bleibt die zuletzt geladene Ansicht sichtbar; Änderungen sind dann gesperrt.", body)]
 
-# ── 2. INSTALLATION ─────────────────────────────────────────────────────────────
-story += [P("2. Installation", h1), HR()]
-story += [P("2.1 Hardwarevoraussetzungen", h2)]
+# ── 2. Installation ──────────────────────────────────────────────────────────
+chapter("Installation", new_page=True)
+story += [P("2.1 Voraussetzungen", h2)]
 story.append(tbl([
     ["Komponente", "Minimum", "Empfohlen"],
-    ["Betriebssystem",  "Windows 10 (64-Bit)",    "Windows Server 2019/2022/2025"],
-    ["Prozessor",       "2 Kerne, 2,0 GHz",       "4 Kerne, 2,5 GHz"],
-    ["RAM",             "4 GB",                    "8 GB"],
-    ["Festplatte",      "20 GB frei (SSD)",        "50 GB SSD"],
-    ["Netzwerk",        "100 Mbit/s",              "Gigabit-LAN"],
-], [45*mm, 55*mm, 60*mm]))
+    ["Betriebssystem", "Windows 10/11 (64 Bit)", "Windows Server 2019, 2022 oder 2025"],
+    ["Prozessor", "2 Kerne", "4 Kerne"],
+    ["Arbeitsspeicher", "4 GB", "8 GB"],
+    ["Festplatte", "2 GB frei", "20 GB frei (SSD) für Fotos und Sicherungen"],
+    ["Rechte", "Administrator für Installation", "–"],
+    ["Internet", "nicht erforderlich", "Zugriff auf github.com für automatische Updates"],
+], [38 * mm, 52 * mm, 80 * mm]))
+story += [P("Node.js oder andere Software muss <b>nicht</b> installiert werden – die Laufzeit ist im Setup enthalten.", note)]
 
-story += [SP(4), P("2.2 Softwarevoraussetzung", h2)]
-story += [P("Node.js 24 LTS – kostenlos von https://nodejs.org", body)]
-story += [P("&#9632; Beim Node.js-Installer den Haken bei <i>Automatically install the necessary tools</i> setzen! Fehlt dieser, schlägt install.bat mit <i>node-gyp rebuild failed</i> fehl.", note), SP(3)]
-
-story += [P("2.3 Installationsschritte", h2)]
+story += [P("2.2 Installationsschritte", h2)]
 story.append(tbl([
     ["Schritt", "Aktion"],
-    ["1", "ZIP-Paket entpacken nach z. B. C:\\Apps\\betten-entlassreinigung\\"],
-    ["2", "Node.js 24 LTS installieren (mit Build-Tools-Haken)"],
-    ["3", "Doppelklick auf install.bat (ca. 2–5 Minuten)"],
-    ["4", "Login: admin@bettenaufbereitung.local / admin123"],
-    ["5", "Passwort sofort ändern: Klick auf eigenen Namen → Profil"],
-], [15*mm, 145*mm]))
+    ["1", "Alvea-Setup-x.y.z.exe von github.com/phillhf/alvea/releases herunterladen"],
+    ["2", "Setup per Rechtsklick → <i>Als Administrator ausführen</i> starten"],
+    ["3", "Lizenz bestätigen und <b>Installationsordner</b> wählen (Standard: C:\\Program Files\\Alvea)"],
+    ["4", "<b>Port</b> festlegen (Standard: 37843). Der Port darf nicht von einem anderen Programm belegt sein."],
+    ["5", "Optional: Ordner einer bisherigen OpenClinic-Installation angeben, um deren Daten zu übernehmen (siehe Kapitel 4)"],
+    ["6", "Optional: <i>Port in der Windows-Firewall freigeben</i> – nötig für Zugriff von iPads und anderen PCs"],
+    ["7", "Installieren. Datenbank, Windows-Dienst „Alvea“ und Update-Aufgabe werden automatisch eingerichtet."],
+    ["8", "Am Ende Alvea im Browser öffnen und mit admin@alvea.local / admin123 anmelden"],
+    ["9", "Passwort sofort ändern: Klick auf den eigenen Namen → Profil"],
+], [16 * mm, 154 * mm]))
 
-story += [SP(4), P("2.4 Starten, Stoppen, Aktualisieren", h2)]
+story += [P("2.3 Aufruf", h2)]
+story += [P("Alvea ist danach im Netzwerk unter <b>http://&lt;Servername oder IP&gt;:&lt;Port&gt;</b> erreichbar, auf dem Server selbst "
+            "unter http://localhost:&lt;Port&gt;. Der Dienst startet automatisch mit Windows und wird bei Absturz neu gestartet.", body)]
+
+story += [P("2.4 Ordnerstruktur", h2)]
 story.append(tbl([
-    ["Aktion", "Befehl / Hinweis"],
-    ["Starten",              "start.bat"],
-    ["Stoppen",              "stop.bat"],
-    ["Als Windows-Dienst",   "install-service.bat"],
-    ["Update (Standard)",    "ZIP in Ordner Update\\ legen → update.bat → J/N für Serverstart"],
-    ["Rollback",             "Automatisch bei Build-Fehler – Datenbank wird wiederhergestellt"],
-    ["Backup-Ordner",        "Update\\Archiv\\ – DB-Sicherung + archivierte ZIPs"],
-], [45*mm, 115*mm]))
+    ["Ordner", "Inhalt", "Bei Update"],
+    ["app\\", "Programmdateien (Server und Weboberfläche)", "wird ersetzt"],
+    ["node\\", "Node.js-Laufzeit", "wird ersetzt"],
+    ["service\\", "Windows-Dienst (WinSW)", "wird ersetzt"],
+    ["data\\alvea.env", "Konfiguration (Port, Pfade, Schlüssel)", "bleibt erhalten"],
+    ["data\\alvea.sqlite", "Datenbank – alle Aufträge, Nutzer, Einstellungen", "bleibt erhalten"],
+    ["data\\uploads\\", "Fotos, Anhänge, Hintergrundbilder", "bleibt erhalten"],
+    ["data\\logs\\", "Protokolle (Programm, Dienst, Installation, Update)", "bleibt erhalten"],
+    ["data\\backups\\", "Datenbank-Sicherungen vor jedem Update", "bleibt erhalten"],
+], [38 * mm, 92 * mm, 40 * mm]))
+story += [P("Der Ordner <b>data\\</b> wird auch bei der Deinstallation nicht gelöscht.", note)]
 
-story += [SP(4), P("2.5 Netzwerk & Logs", h2)]
+story += [P("2.5 Startmenü", h2)]
 story.append(tbl([
-    ["Parameter", "Wert"],
-    ["Standard-Port",  "37843 (konfigurierbar in backend/.env)"],
-    ["Protokoll intern","HTTP"],
-    ["Kamerazugriff",  "Über nativen Datei-Dialog (kein HTTPS erforderlich)"],
-    ["Logs",           "logs\\app.log (täglich rotiert, 30 Tage, JSON-Format)"],
-], [45*mm, 115*mm]))
-story.append(PageBreak())
+    ["Eintrag", "Funktion"],
+    ["Alvea öffnen", "Öffnet die Weboberfläche im Browser"],
+    ["Nach Updates suchen", "Prüft GitHub auf eine neue Version und installiert sie (siehe Kapitel 3)"],
+    ["Konfiguration bearbeiten", "Öffnet data\\alvea.env im Editor"],
+    ["Protokolle", "Öffnet den Ordner data\\logs"],
+    ["Alvea deinstallieren", "Entfernt Programm, Dienst, Update-Aufgabe und Firewall-Regel – Daten bleiben"],
+], [50 * mm, 120 * mm]))
 
-# ── 3. ROLLEN & BERECHTIGUNGEN ───────────────────────────────────────────────────
-story += [P("3. Rollen &amp; Berechtigungen", h1), HR()]
-story += [P("Das System verwendet 16 frei konfigurierbare Berechtigungen. Nutzer mit 'verwaltung' sehen immer alle Tabs.", body), SP(3)]
+story += [P("2.6 Dienst steuern", h2)]
+story += [P("Dienst <b>Alvea</b> in services.msc oder in einer Administrator-Eingabeaufforderung: "
+            "<i>net stop Alvea</i> / <i>net start Alvea</i>.", body)]
+story += [P("2.7 Unbeaufsichtigte Installation", h2)]
+story += [P("Alvea-Setup-x.y.z.exe /VERYSILENT /DIR=\"D:\\Alvea\" /PORT=8080 [/MIGRATE=\"C:\\Apps\\openclinic\"]", body)]
 
-story += [P("3.1 Die 16 Berechtigungen", h2)]
-story.append(tbl([
-    ["Berechtigung", "Tab / Funktion"],
-    ["bettenaufbereitung",       "Stationsübersicht – Aufträge annehmen und bearbeiten"],
-    ["bettenaufbereitung_zentral","Bett-Zentral – zentrale Aufbereitung"],
-    ["zimmerreinigung",          "Scheuer-Wisch Tab (Reinigungskräfte bearbeiten Aufträge)"],
-    ["stationspersonal",         "Meine Station – Pflegepersonal"],
-    ["betten_reparatur",         "Instandsetzung – Defekte verwalten, Betten sperren"],
-    ["bettenstamm",              "Bettenstamm – physische Betten anlegen und pflegen"],
-    ["betten_pw",                "Betten P&W – Prüftermin-Übersicht und P&W durchführen"],
-    ["dashboard",                "Schichtleiter-Dashboard"],
-    ["berichte",                 "Berichte – Stationsberichte und PDF-Export"],
-    ["meldungen",                "Meldungen – erstellen, bearbeiten und löschen"],
-    ["spindverwaltung",          "Spindverwaltung – Spinde und Anfragen verwalten"],
-    ["raumbuch",                 "Raumbuch – Raumverwaltung und Excel-Import"],
-    ["auftraege_erstellen",      "Neue Aufträge anlegen"],
-    ["benutzerverwaltung",       "Mitarbeiter, Rollen und Teams verwalten"],
-    ["sauerstofftransport",      "Sauerstofftransport-Modul (Scan, Anfragen, Lager)"],
-    ["verwaltung",               "Vollzugriff auf alle Tabs und Verwaltungs-Bereiche (Admin)"],
-], [50*mm, 110*mm]))
-
-story += [SP(3), P("&#9632; Wichtig: stationspersonal darf Scheuer-Wisch beauftragen OHNE die Berechtigung 'zimmerreinigung'.", note), SP(3)]
-
-story += [P("3.2 Empfohlene Rollen-Konfiguration", h2)]
-story.append(tbl([
-    ["Rollen-Name", "Berechtigungen", "Für"],
-    ["Pflegepersonal",        "stationspersonal",                                                           "Krankenpflege auf Station"],
-    ["Reinigungskraft Dez.",  "bettenaufbereitung, zimmerreinigung",                                        "Reinigung auf Station"],
-    ["Reinigungskraft Zentral","bettenaufbereitung_zentral",                                                "Personal Aufbereitungsanlage"],
-    ["Schichtleiter",         "bettenaufbereitung, zimmerreinigung, berichte, dashboard,\nauftraege_erstellen, meldungen", "Bereichsleitung"],
-    ["Techniker",             "betten_reparatur, bettenstamm, betten_pw",                                   "Haustechnik / Instandsetzung"],
-    ["Sauerstofftransport",   "sauerstofftransport",                                                        "Sauerstofflieferung im Haus"],
-    ["Spindverwalter",        "spindverwaltung",                                                            "Spind-Verwaltung"],
-    ["Administrator",         "alle 16 Berechtigungen",                                                     "IT / Leitung"],
-], [40*mm, 80*mm, 40*mm]))
-story.append(PageBreak())
-
-# ── 4. ERSTE SCHRITTE ───────────────────────────────────────────────────────────
-story += [P("4. Erste Schritte nach der Installation", h1), HR()]
+# ── 3. Updates ───────────────────────────────────────────────────────────────
+chapter("Updates", new_page=True)
+story += [P("Neue Versionen werden als Release auf GitHub veröffentlicht. Alvea prüft dort selbst, ob eine neuere Version vorliegt.", body)]
+story += [P("3.1 Update aus der Weboberfläche", h2)]
 story.append(tbl([
     ["Schritt", "Aktion"],
-    ["1",  "Admin-Login: admin@bettenaufbereitung.local / admin123"],
-    ["2",  "Passwort ändern: Klick auf eigenen Namen → Profil"],
-    ["3",  "Verwaltung → Rollen anlegen und Berechtigungen vergeben"],
-    ["4",  "Verwaltung → Häuser, Bereiche, Stationen, Zimmer anlegen"],
-    ["5",  "Verwaltung → Betten (Platzhalterbetten) anlegen"],
-    ["6",  "Verwaltung → Aufbereitungsarten für Bett-Zentral anlegen"],
-    ["7",  "Verwaltung → Berufsgruppen für Spind-Anfragen anlegen"],
-    ["8",  "Verwaltung → Mitarbeiter anlegen und Rollen zuweisen"],
-    ["9",  "Bettenstamm → Physische Betten anlegen (Barcode, Typ, Prüftermin)"],
-    ["10", "Verwaltung → O2 → Lager und Flaschentypen anlegen (Sauerstoffmodul)"],
-    ["11", "Verwaltung → Rücks.-Gründe → Abschluss-Gründe für Rücksendungen anlegen"],
-], [15*mm, 145*mm]))
-story.append(PageBreak())
-
-# ── 5. BENUTZEROBERFLÄCHE ───────────────────────────────────────────────────────
-story += [P("5. Benutzeroberfläche &amp; Navigation", h1), HR()]
-story += [P("5.1 Sidebar-Navigation (Desktop ≥ 1024px)", h2)]
+    ["1", "Verwaltung → Tab <b>Update</b> öffnen (Berechtigung <i>verwaltung</i>)"],
+    ["2", "Installierte und neueste Version sowie die Änderungen der neuen Version werden angezeigt"],
+    ["3", "<b>Jetzt aktualisieren</b> → Sicherheitsabfrage mit <b>Ja, Update starten</b> bestätigen"],
+    ["4", "Alvea ist ca. 1–3 Minuten nicht erreichbar. Die Seite lädt danach automatisch mit der neuen Version neu."],
+], [16 * mm, 154 * mm]))
+story += [P("3.2 Update auf dem Server", h2)]
+story += [P("Startmenü → Alvea → <b>Nach Updates suchen</b>. Das Fenster zeigt die gefundene Version und fragt vor der Installation nach.", body)]
+story += [P("3.3 Was beim Update passiert", h2)]
 story.append(tbl([
-    ["Menüpunkt", "Berechtigung", "Funktion"],
-    ["Stationsübersicht",      "bettenaufbereitung",       "Dezentrale Bettenaufbereitung"],
-    ["Bett-Zentral",           "bettenaufbereitung_zentral","Zentrale Bettenaufbereitung"],
-    ["Scheuer-Wisch",          "zimmerreinigung",           "Aufträge bearbeiten"],
-    ["Meine Station",          "stationspersonal",          "Pflegepersonal: Reinigung & Defekte"],
-    ["Dashboard",              "dashboard",                 "Schichtleiter-Gesamtübersicht"],
-    ["Instandsetzung",         "betten_reparatur",          "Defektmanagement"],
-    ["Bettenstamm",            "bettenstamm",               "Physische Betten verwalten"],
-    ["Betten P&W",             "betten_pw",                 "Prüftermin-Übersicht"],
-    ["Spindverwaltung",        "spindverwaltung",           "Spinde und Anfragen"],
-    ["Raumbuch",               "raumbuch",                  "Raumverwaltung"],
-    ["Sauerstofftransport",    "sauerstofftransport",       "O2-Logistik: Scan & Anfragen"],
-    ["Rücksendungen",          "verwaltung",                "Rücksendungen bearbeiten"],
-    ["Meldungen",              "meldungen",                 "Team-Meldungen"],
-    ["Berichte",               "berichte",                  "Stationsberichte und PDF-Export"],
-    ["Verwaltung",             "verwaltung",                "Systemverwaltung"],
-], [45*mm, 55*mm, 60*mm]))
+    ["Schritt", "Beschreibung"],
+    ["Download", "Setup und Prüfsumme der neuesten Version werden von GitHub geladen"],
+    ["Prüfung", "Die SHA256-Prüfsumme wird kontrolliert – bei Abweichung wird abgebrochen"],
+    ["Sicherung", "Dienst wird gestoppt, Datenbank und Konfiguration nach data\\backups\\vor-update-… kopiert"],
+    ["Installation", "Setup läuft unsichtbar; Port und Einstellungen bleiben erhalten"],
+    ["Start", "Dienst startet, Datenbank-Migrationen laufen automatisch"],
+    ["Kontrolle", "Es wird geprüft, ob die neue Version antwortet. Fehler werden in Verwaltung → Update angezeigt."],
+], [30 * mm, 140 * mm]))
+story += [P("Protokoll: data\\logs\\update.log. Ohne Internetzugriff des Servers: neues Setup an einem anderen PC herunterladen, "
+            "auf den Server kopieren und ausführen – das ist gleichwertig.", note)]
 
-story += [SP(3), P("5.2 Mobile Navigation", h2)]
-story += [P("Hamburger-Button oben links öffnet die Sidebar. Schließt automatisch bei Seitenwechsel.", body)]
-story += [SP(2), P("5.3 Hochkontrast-Modus", h2)]
-story += [P("Button 'Kontrast' in der Sidebar: schwarzer Hintergrund, weißer Text, gelbe Akzente (WCAG AA). Wird nicht gespeichert – bei jedem Login wieder normal.", body)]
-story += [SP(2), P("5.4 App als PWA installieren", h2)]
-story += [P("iPad/iPhone (Safari): Teilen → Zum Home-Bildschirm | Android (Chrome): Menü → App installieren.", body)]
-story.append(PageBreak())
+# ── 4. Umstieg von OpenClinic ────────────────────────────────────────────────
+chapter("Umstieg von OpenClinic")
+story += [P("Alvea ist der Nachfolger von <i>OpenClinic</i> (davor <i>Betten &amp; Entlassreinigung</i>). Bei der Erstinstallation "
+            "erkennt das Setup einen laufenden OpenClinic-Dienst automatisch und schlägt dessen Ordner vor.", body), SP(2)]
+story.append(tbl([
+    ["Wird übernommen", "Hinweis"],
+    ["Datenbank", "Alle Aufträge, Nutzer, Rollen, Raumbuch, Einstellungen"],
+    ["Uploads", "Fotos, Anhänge, Hintergrundbilder"],
+    ["Anmeldeschlüssel", "Angemeldete Nutzer bleiben angemeldet"],
+    ["Admin-Login", "Bisherige Adresse (z. B. admin@openclinic.local) gilt weiter"],
+], [45 * mm, 125 * mm]))
+story += [P("Der alte Dienst wird gestoppt und deaktiviert, aber nicht gelöscht; der alte Ordner bleibt unverändert. "
+            "Läuft Alvea stabil, kann der alte Dienst entfernt (<i>nssm remove OpenClinic confirm</i>) und der Ordner gelöscht werden. "
+            "Ein unter Verwaltung → Design gespeicherter App-Name „OpenClinic“ muss dort ggf. angepasst werden.", note)]
 
-# ── 6–8 KERNMODULE ─────────────────────────────────────────────────────────────
-story += [P("6. Stationsübersicht – Dezentrale Bettenaufbereitung", h1), HR()]
-story += [P("Zeigt alle Stationen im zugewiesenen Bereich, sortiert nach Prioritätsscore.", body), SP(2)]
-story += [P("6.1 Auftrag annehmen (Reinigungskraft)", h2)]
+# ── 5. Rollen & Berechtigungen ───────────────────────────────────────────────
+chapter("Rollen & Berechtigungen", new_page=True)
+story += [P("Rollen werden unter <b>Benutzer &amp; Rollen → Rollen</b> frei angelegt. Jede Rolle erhält eine Auswahl aus 22 Berechtigungen. "
+            "Nach einer Änderung muss sich der Nutzer neu anmelden.", body)]
+story += [P("5.1 Die 22 Berechtigungen", h2)]
+story.append(tbl([
+    ["Berechtigung", "Zugriff"],
+    ["bettenaufbereitung", "Stationsübersicht – dezentrale Aufträge annehmen und bearbeiten"],
+    ["bettenaufbereitung_zentral", "Bett-Zentral"],
+    ["zimmerreinigung", "Scheuer-Wisch – Reinigungsaufträge bearbeiten"],
+    ["stationspersonal", "Meine Station – Anforderungen der eigenen Station"],
+    ["auftraege_erstellen", "Aufträge anlegen"],
+    ["dashboard", "Schichtleiter-Dashboard"],
+    ["berichte", "Berichte und PDF-Export"],
+    ["betten_reparatur", "Instandsetzung"],
+    ["bettenstamm", "Bettenstamm"],
+    ["betten_pw", "Betten P&amp;W (Prüfung und Wartung)"],
+    ["sauerstofftransport", "Sauerstofftransport"],
+    ["lager", "Rücksendungen bearbeiten (Lager/Einkauf)"],
+    ["waesche", "Kissen &amp; Bettdecken – Anfragen bearbeiten"],
+    ["spindverwaltung", "Spindverwaltung"],
+    ["raumbuchung", "Räume und Arbeitsplätze buchen"],
+    ["raumbuchung_stellvertretung", "Für andere Personen buchen (laut Stellvertretungs-Zuordnung)"],
+    ["raumbuchungsadmin", "Buchbare Räume und Arbeitsplätze verwalten, alle Buchungen sehen"],
+    ["meldungen", "Meldungen erstellen, bearbeiten, löschen"],
+    ["chat", "Stations-Chat"],
+    ["raumbuch", "Raumbuch bearbeiten und importieren"],
+    ["benutzerverwaltung", "Mitarbeiter, Rollen und Teams"],
+    ["verwaltung", "Vollzugriff: alle Bereiche inklusive Verwaltung, Backup, Design und Update"],
+], [52 * mm, 118 * mm]))
+story += [P("5.2 Sichtbarkeit (Scope)", h2)]
+story += [P("Was ein Nutzer sieht, richtet sich nach seiner Zuweisung: Stationszuweisung (höchste Priorität) → Bereichszuweisung → "
+            "Bereiche seines Teams. Nutzer mit <i>verwaltung</i> sehen alles. Zentral-Aufträge sind für alle mit "
+            "<i>bettenaufbereitung_zentral</i> sichtbar.", body)]
+story += [P("5.3 Beispiel-Rollen", h2)]
+story.append(tbl([
+    ["Rolle", "Berechtigungen"],
+    ["Pflegepersonal", "stationspersonal"],
+    ["Reinigungskraft dezentral", "bettenaufbereitung, zimmerreinigung"],
+    ["Reinigungskraft zentral", "bettenaufbereitung_zentral, waesche"],
+    ["Schichtleitung", "bettenaufbereitung, zimmerreinigung, auftraege_erstellen, dashboard, berichte, meldungen"],
+    ["Haustechnik", "betten_reparatur, bettenstamm, betten_pw"],
+    ["Sauerstofftransport", "sauerstofftransport"],
+    ["Lager / Einkauf", "lager"],
+    ["Sekretariat", "raumbuchung, raumbuchung_stellvertretung"],
+    ["Administrator", "alle 22 Berechtigungen"],
+], [48 * mm, 122 * mm]))
+story += [P("Pflegepersonal kann über Meine Station Scheuer-Wisch beauftragen, ohne selbst <i>zimmerreinigung</i> zu besitzen.", note)]
+
+# ── 6. Erste Schritte ────────────────────────────────────────────────────────
+chapter("Erste Schritte", new_page=True)
 story.append(tbl([
     ["Schritt", "Aktion"],
-    ["1","Station antippen → Auftrag antippen"],
-    ["2","'Auf dem Weg' drücken"],
-    ["3","Auf der Station ankommen → 'Angekommen' drücken"],
-    ["4","'Auftrag im Zimmer annehmen' → Reinigung startet"],
-    ["5","Checkliste abhaken, Fotos machen"],
-    ["6","Barcode des physischen Betts scannen (empfohlen)"],
-    ["7","'Auftrag als erledigt melden'"],
-], [15*mm, 145*mm]))
+    ["1", "Als admin@alvea.local anmelden und Passwort unter Profil ändern"],
+    ["2", "Verwaltung → <b>Module</b>: nicht benötigte Module deaktivieren"],
+    ["3", "Raumbuch: Häuser, Gebäude, Bereiche/Stationen, Räume und Stellplätze anlegen – oder per Excel-<b>Import</b>"],
+    ["4", "Benutzer &amp; Rollen: Rollen prüfen bzw. anlegen, Teams anlegen"],
+    ["5", "Benutzer &amp; Rollen → Mitarbeiter anlegen, Rolle und Station/Bereich zuweisen"],
+    ["6", "Verwaltung → Desinfektionsmaßnahmen und Bett-Typen für Bett-Zentral pflegen"],
+    ["7", "Bettenstamm: physische Betten mit Barcode und Prüftermin anlegen"],
+    ["8", "Je nach Modul: O2-Lager und Flaschentypen, Rücksendungs-Gründe, Wäschetypen, Berufsgruppen (Spinde), buchbare Räume"],
+    ["9", "Verwaltung → <b>Backup</b>: tägliche Sicherung auf ein Netzlaufwerk einrichten"],
+    ["10", "Verwaltung → <b>Design</b>: Farben, Logo-Text und Login-Seite anpassen"],
+], [16 * mm, 154 * mm]))
 
-story += [SP(4), P("7. Bett-Zentral – Zentrale Aufbereitung", h1), HR()]
-story += [P("Empfängt Betten aus dem gesamten Haus. Barcode ist Pflichtfeld.", body), SP(2)]
+# ── 7. Oberfläche ────────────────────────────────────────────────────────────
+chapter("Benutzeroberfläche & Navigation")
+story += [P("Die Seitenleiste zeigt nur Bereiche, für die der Nutzer berechtigt ist und deren Modul aktiv ist.", body), SP(2)]
+story.append(tbl([
+    ["Menüpunkt", "Berechtigung"],
+    ["Stationsübersicht (Betten)", "bettenaufbereitung"],
+    ["Bett-Zentral", "bettenaufbereitung_zentral"],
+    ["Scheuer-Wisch", "zimmerreinigung"],
+    ["Sauerstoff", "sauerstofftransport"],
+    ["Meine Station (Name der Station)", "stationspersonal"],
+    ["Instandsetzung", "betten_reparatur oder verwaltung"],
+    ["Bettenstamm / Betten P&amp;W", "bettenstamm bzw. betten_pw oder verwaltung"],
+    ["Dashboard", "dashboard oder verwaltung"],
+    ["Berichte", "berichte"],
+    ["Meldungen", "meldungen oder verwaltung"],
+    ["Spindverwaltung", "spindverwaltung oder verwaltung"],
+    ["Raumbuch", "raumbuch oder verwaltung"],
+    ["Rücksendungen", "lager oder verwaltung"],
+    ["Raumbuchung", "raumbuchung, raumbuchungsadmin oder verwaltung"],
+    ["Benutzer &amp; Rollen", "benutzerverwaltung oder verwaltung"],
+    ["Verwaltung", "verwaltung"],
+], [70 * mm, 100 * mm]))
+story += [P("Auf Tablets und Smartphones öffnet der Menü-Knopf oben links die Navigation. Der Hochkontrast-Modus "
+            "(schwarzer Hintergrund, gelbe Akzente) ist über die Seitenleiste umschaltbar. "
+            "Als App installieren: Safari → Teilen → Zum Home-Bildschirm, bzw. Chrome → Menü → App installieren.", body)]
+
+# ── 8. Bettenaufbereitung ────────────────────────────────────────────────────
+chapter("Bettenaufbereitung (dezentral)", new_page=True)
+story += [P("Die Stationsübersicht zeigt alle Stationen im eigenen Bereich, sortiert nach Prioritätsscore. Jeder offene Auftrag zählt "
+            "einen Punkt, länger wartende Aufträge zusätzlich; die Schwellen für Gelb und Rot werden unter Verwaltung → Einstellungen festgelegt.", body)]
+story += [P("8.1 Auftrag bearbeiten", h2)]
+story.append(tbl([
+    ["Schritt", "Aktion"],
+    ["1", "Station antippen → Auftrag antippen"],
+    ["2", "<b>Auf dem Weg</b> – Kollegen sehen, dass der Auftrag übernommen ist"],
+    ["3", "<b>Angekommen</b> – Auftrag im Zimmer annehmen, Reinigung beginnt"],
+    ["4", "Checkliste abhaken, bei Bedarf Fotos aufnehmen"],
+    ["5", "Barcode des Betts scannen (empfohlen, erzeugt die Reisehistorie des Betts)"],
+    ["6", "<b>Als erledigt melden</b>"],
+], [16 * mm, 154 * mm]))
+story += [P("8.2 Infektiöse Aufbereitung", h2)]
+story += [P("Bei <i>Infektiös</i> wird der Erreger ausgewählt. Zu jedem Erreger zeigt Alvea Desinfektionsmittel, Material und "
+            "Schutzmaßnahmen an (pflegbar unter Verwaltung → Krankheitserreger). Für jedes Bett kann nur ein aktiver Auftrag existieren.", body)]
+
+# ── 9. Bett-Zentral ──────────────────────────────────────────────────────────
+chapter("Bett-Zentral")
+story += [P("Für die zentrale Aufbereitung im Aufbereitungsraum. Es gibt keinen Transport-Schritt; der Barcode ist Pflicht.", body), SP(2)]
 story.append(tbl([
     ["Schritt", "Inhalt"],
-    ["1 – Barcode",         "Pflichtfeld. Eingeben, aus Dropdown wählen oder per Kamera scannen."],
-    ["2 – Bett-Typ",        "Welcher Bett-Typ wird aufbereitet?"],
-    ["3 – ISO-Bett",        "ISO-Betten werden rot markiert, erfordern erhöhte Schutzmaßnahmen."],
-    ["4 – Erreger",         "Falls bekannt: Erreger auswählen (optional)."],
-    ["5 – Aufbereitungsart","Das anzuwendende Verfahren mit Anleitung."],
-], [35*mm, 125*mm]))
+    ["1 – Barcode", "Eingeben, aus der Liste wählen oder per Kamera scannen"],
+    ["2 – Bett-Typ", "Welcher Bett-Typ wird aufbereitet?"],
+    ["3 – ISO-Bett", "Isolationsbetten werden rot markiert"],
+    ["4 – Erreger", "Falls bekannt (optional)"],
+    ["5 – Desinfektionsmaßnahme", "Verfahren mit Anleitung und Hinweis „Wann anwenden?“"],
+], [42 * mm, 128 * mm]))
+story += [P("Die Filterleiste zeigt Alle / Offen / Meine mit Zählern. Ein Defekt-Knopf auf der Karte meldet das Bett direkt an die Instandsetzung. "
+            "Wäsche-Anfragen der Stationen erscheinen hier, sofern die Berechtigung <i>waesche</i> vorhanden ist.", body)]
 
-story += [SP(4), P("8. Scheuer-Wisch", h1), HR()]
-story += [P("Modul muss in Verwaltung → Module aktiv sein. Aufträge werden von Pflegepersonal über Meine Station oder von Reinigungskräften direkt angelegt.", body), SP(2)]
+# ── 10. Scheuer-Wisch ────────────────────────────────────────────────────────
+chapter("Scheuer-Wisch")
 story.append(tbl([
     ["Reinigungsart", "Wann", "Besonderheit"],
-    ["Standardreinigung",  "Routinemäßige Entlassreinigung", "Keine Erreger-Dokumentation nötig"],
-    ["Schlussdesinfektion","Nach Isolation, infektiösen Patienten", "Erreger optional auswählbar"],
-], [50*mm, 65*mm, 45*mm]))
-story.append(PageBreak())
+    ["Standardreinigung", "Routinemäßige Entlassreinigung", "Keine Erreger-Angabe nötig"],
+    ["Schlussdesinfektion", "Nach Isolation bzw. infektiösen Patienten", "Erreger auswählbar"],
+], [42 * mm, 68 * mm, 60 * mm]))
+story += [SP(2), P("Aufträge entstehen über Meine Station (Pflegepersonal) oder direkt in Scheuer-Wisch. Die Zimmerübersicht zeigt je Zimmer "
+                   "den Status; laufende Aufträge stehen im Abschnitt „In Bearbeitung“.", body)]
 
-# ── 9. MEINE STATION ────────────────────────────────────────────────────────────
-story += [P("9. Meine Station – Pflegepersonal", h1), HR()]
-story += [P("Dedizierter Bereich für Pflegepersonal (Berechtigung: stationspersonal). Zeigt nur die eigene Station.", body), SP(2)]
-
-story += [P("9.1 Verfügbare Aktionen", h2)]
+# ── 11. Meine Station ────────────────────────────────────────────────────────
+chapter("Meine Station (Pflegepersonal)", new_page=True)
+story += [P("Startseite für Pflegepersonal (Berechtigung <i>stationspersonal</i>). Zeigt nur die eigene Station, die in der Seitenleiste mit "
+            "ihrem Namen erscheint.", body), SP(2)]
 story.append(tbl([
     ["Funktion", "Beschreibung"],
-    ["+ Bettenreinigung anfordern","Station → Zimmer → Bett → Normal/Infektiös → Absenden"],
-    ["+ Scheuer-Wisch",           "Zimmer, Reinigungsart und Aufbereitungsart wählen → Absenden"],
-    ["+ Defektes Bett",           "Station + Barcode (optional) + Standort + Beschreibung"],
-    ["+ Spind-Anfrage",           "Vorname, Nachname, Berufsgruppe, Von/Bis → Absenden"],
-    ["+ Sauerstoff anfordern",    "Anzahl + Flaschentyp (optional) + Notiz → Anfrage an Transport"],
-    ["+ Rücksendung melden",      "Artikel-Liste + Menge + Grund → Meldung ans Lager"],
-    ["Statusübersicht",           "Aktive Aufträge der eigenen Station (nur lesen)"],
-], [55*mm, 105*mm]))
+    ["Bettenreinigung anfordern", "Zimmer → Bett → Normal oder Infektiös → Absenden"],
+    ["Scheuer-Wisch anfordern", "Zimmer und Reinigungsart wählen"],
+    ["Defektes Bett melden", "Barcode (optional), Standort, Beschreibung"],
+    ["Sauerstoff anfordern", "Anzahl, Flaschentyp, Notiz – Status: Offen → Unterwegs → Geliefert"],
+    ["Rücksendung melden", "Artikel mit Menge und Grund je Artikel; Begleitschein-PDF öffnet automatisch"],
+    ["Kissen &amp; Bettdecken anfordern", "Wäschetyp und Menge"],
+    ["Spind-Anfrage", "Vorname, Nachname, Berufsgruppe, Zeitraum"],
+    ["Statusübersicht", "Alle aktiven Aufträge und Anfragen der Station"],
+], [52 * mm, 118 * mm]))
 
-story += [SP(2), P("&#9632; Pflegepersonal kann Scheuer-Wisch beauftragen OHNE 'zimmerreinigung'-Berechtigung.", note)]
-story += [SP(2), P("9.2 Duplikatschutz", h2)]
-story += [P("Für jedes Bett kann nur ein aktiver Auftrag gleichzeitig existieren. Bei erneutem Absenden: 'Für dieses Bett existiert bereits ein aktiver Auftrag.'", body)]
-story += [SP(3), P("9.3 Sauerstoff-Anfragen (Status in Meine Station)", h2)]
-story.append(tbl([
-    ["Status", "Anzeige", "Bedeutung"],
-    ["Offen",      "⏳ Gelb",  "Anfrage gesendet, noch nicht angenommen"],
-    ["Unterwegs",  "🚚 Blau",  "Sauerstofftransport hat Anfrage angenommen"],
-    ["Geliefert",  "✅ Grün",  "Flaschen wurden geliefert – Löschen möglich"],
-], [30*mm, 30*mm, 100*mm]))
+# ── 12. Dashboard ────────────────────────────────────────────────────────────
+chapter("Dashboard")
+story += [P("Schichtleiter-Übersicht über alle Stationen mit offenen Aufträgen, automatisch aktualisiert. Stationen ohne offene Aufträge "
+            "werden ausgeblendet; hohe Priorität ist rot, erhöhte orange markiert.", body)]
 
-story += [SP(3), P("9.4 Rücksendungen (Status in Meine Station)", h2)]
-story.append(tbl([
-    ["Status", "Bedeutung"],
-    ["Offen",        "Rücksendung gemeldet, noch nicht bearbeitet"],
-    ["Angenommen",   "Lager hat die Anfrage entgegengenommen"],
-    ["Abgeschlossen","Rücksendung abgewickelt (Grund sichtbar)"],
-], [35*mm, 125*mm]))
-story.append(PageBreak())
+# ── 13. Meldungen ────────────────────────────────────────────────────────────
+chapter("Meldungen")
+story += [P("Alle angemeldeten Nutzer lesen aktive Meldungen; erstellen und bearbeiten dürfen Nutzer mit <i>meldungen</i>. "
+            "Prioritäten: Normal (blau), Wichtig (orange), Dringend (rot). Abgelaufene Meldungen stehen im aufklappbaren Archiv.", body)]
 
-# ── 10–16 ──────────────────────────────────────────────────────────────────────
-story += [P("10. Dashboard – Schichtleiter-Übersicht", h1), HR()]
-story += [P("Zeigt alle Stationen mit Handlungsbedarf. Aktualisierung alle 30 Sekunden. Stationen ohne offene Aufträge werden ausgeblendet.", body), SP(2)]
-story.append(tbl([
-    ["Markierung", "Bedeutung"],
-    ["Roter linker Rand",    "Höchste Priorität – sofort handeln (Score ≥ 6)"],
-    ["Oranger linker Rand",  "Erhöhte Priorität (Score 3–6)"],
-    ["Kein Rand / nicht sichtbar","Keine offenen Aufträge – Station ausgeblendet"],
-], [45*mm, 115*mm]))
-
-story += [SP(4), P("11. Meldungen", h1), HR()]
-story += [P("Eigener Tab für Team-Meldungen (Berechtigung: meldungen). Alle eingeloggten Nutzer können aktive Meldungen lesen.", body), SP(2)]
-story.append(tbl([
-    ["Priorität", "Anzeige", "Verwendung"],
-    ["Normal",   "Blauer Badge",  "Allgemeine Informationen"],
-    ["Wichtig",  "Oranger Badge", "Zeitkritische Hinweise"],
-    ["Dringend", "Roter Badge",   "Sofortmaßnahmen erforderlich"],
-], [30*mm, 40*mm, 90*mm]))
-
-story += [SP(4), P("12. Instandsetzung – Defektmanagement", h1), HR()]
-story.append(tbl([
-    ["Weg", "Wo", "Felder"],
-    ["Pflegepersonal",  "Meine Station → '+ Defektes Bett'",        "Station, Barcode (optional), Standort, Beschreibung"],
-    ["Reinigungskraft", "Stationsübersicht → '+ Defektes Bett'",    "Station, Barcode (optional), Standort, Beschreibung"],
-    ["Zentral",         "Bett-Zentral → Defekt-Button auf Karte",   "Barcode vorausgefüllt, Beschreibung, Schweregrad"],
-], [30*mm, 60*mm, 70*mm]))
-story += [SP(2)]
-story.append(tbl([
-    ["Status", "Wer"],
-    ["Gemeldet – erscheint in Instandsetzung-Liste",  "Automatisch nach Meldung"],
-    ["In Reparatur – 'Reparatur starten' + opt. Notiz","Techniker (betten_reparatur)"],
-    ["Behoben – 'Als behoben markieren'",             "Techniker"],
-    ["Ausgemustert",                                   "Techniker"],
-], [80*mm, 80*mm]))
-
-story += [SP(4), P("13. Bettenstamm – Physische Bettenverwaltung", h1), HR()]
-story.append(tbl([
-    ["Feld", "Pflicht", "Beschreibung"],
-    ["Barcode / Nummer",  "Ja",  "Eindeutiger Identifikator (aufgeklebter Strichcode)"],
-    ["Bett-Typ",          "Nein","Art des Betts (Standardbett, Intensivbett …)"],
-    ["Hersteller / Modell","Nein","z. B. Stiegelmeyer, Linet"],
-    ["Nächster Prüftermin","Nein","Datum der nächsten Prüfung"],
-    ["Notizen",           "Nein","Interne Hinweise"],
-], [45*mm, 20*mm, 95*mm]))
-
-story += [SP(4), P("14. Betten P&amp;W – Prüfung &amp; Wartung", h1), HR()]
-story.append(tbl([
-    ["Kachel", "Bedeutung"],
-    ["Überfällig",    "Betten deren Prüftermin bereits überschritten ist"],
-    ["Bald fällig",   "Betten mit Prüftermin in weniger als 30 Tagen"],
-    ["Gesperrt",      "Aktuell gesperrte Betten"],
-    ["Kein Termin",   "Betten ohne hinterlegten Prüftermin"],
-], [35*mm, 125*mm]))
-story.append(PageBreak())
-
-story += [P("15. Spindverwaltung", h1), HR()]
-story += [P("Modul muss in Verwaltung → Module aktiv sein.", body), SP(2)]
-story += [P("15.1 Spind-Anfrage (Pflegepersonal über Meine Station)", h2)]
-story += [P("Pflichtfelder: Vorname, Nachname, Berufsgruppe. Der Bereich/Station wird automatisch aus dem User-Profil übernommen. Zeitraum Von/Bis ist optional.", body)]
-story += [SP(2), P("15.2 Anfragen bearbeiten (Spindverwalter)", h2)]
-story.append(tbl([
-    ["Aktion", "Beschreibung"],
-    ["Spind zuweisen","Freien Spind aus Dropdown wählen, Von/Bis bestätigen"],
-    ["Ablehnen",      "Status 'abgelehnt', sichtbar in Meine Station"],
-], [40*mm, 120*mm]))
-
-story += [SP(4), P("16. Raumbuch", h1), HR()]
-story += [P("Raumverwaltung mit Import-Funktion. Hierarchie: Haus → Bereich → Zimmer → Stellplatz.", body), SP(2)]
-story += [P("16.1 Excel-Import", h2)]
-story.append(tbl([
-    ["Schritt", "Aktion"],
-    ["1","Excel-Datei auswählen (.xlsx)"],
-    ["2","Spalten manuell den Feldern zuordnen (kein Auto-Mapping)"],
-    ["3","Importieren – Zeilen mit fehlenden Pflichtfeldern werden übersprungen"],
-], [15*mm, 145*mm]))
-story += [SP(2), P("Pflichtfelder: Haus, Bereich, Raumnummer. Optional: Raumbezeichnung, Etage, Fläche, Stellplatz.", body)]
-story.append(PageBreak())
-
-# ── 17. SAUERSTOFFTRANSPORT ─────────────────────────────────────────────────────
-story += [P("17. Sauerstofftransport", h1), HR()]
-story += [P("Das Sauerstoffmodul verwaltet den gesamten Lebenszyklus von Sauerstoffflaschen im Haus – von der Lieferantenlieferung bis zur Rückgabe.", body), SP(2)]
-
-story += [P("17.1 Status-Modell der Flaschen", h2)]
+# ── 14. Instandsetzung ───────────────────────────────────────────────────────
+chapter("Instandsetzung", new_page=True)
+story += [P("Defekte Betten werden über Meine Station, die Stationsübersicht oder Bett-Zentral gemeldet und erscheinen in der Instandsetzung "
+            "(Liste und Board-Ansicht).", body), SP(2)]
 story.append(tbl([
     ["Status", "Bedeutung"],
-    ["Volllager",        "Volle Flasche im Lager, zur Verteilung bereit"],
-    ["Unterwegs",        "Flasche ist beim Transporter / auf dem Weg zur Station"],
-    ["Auf Station",      "Flasche wurde an Station übergeben"],
-    ["Leer/Unterwegs",   "Leere Flasche, auf dem Rückweg ins Lager"],
-    ["Leergutlager",     "Leere Flasche im Leergutlager, wartet auf Abholung"],
-    ["Beim Lieferanten", "Flasche wurde an den Lieferanten zurückgegeben"],
-], [40*mm, 120*mm]))
+    ["Gemeldet", "Neue Meldung, noch nicht bearbeitet"],
+    ["In Reparatur", "Techniker hat die Reparatur begonnen (optional mit Notiz)"],
+    ["Behoben", "Bett ist wieder einsatzbereit"],
+    ["Ausgemustert", "Bett wird nicht mehr verwendet"],
+], [40 * mm, 130 * mm]))
 
-story += [SP(3), P("17.2 Scan-Modi", h2)]
+# ── 15. Bettenstamm / P&W ────────────────────────────────────────────────────
+chapter("Bettenstamm und Betten P&W")
+story += [P("Im <b>Bettenstamm</b> werden physische Betten mit Barcode, Bett-Typ, Hersteller/Modell, nächstem Prüftermin und Notizen gepflegt. "
+            "<b>Betten P&amp;W</b> zeigt Kacheln für überfällige, bald fällige (unter 30 Tagen), gesperrte Betten und Betten ohne Termin "
+            "und dokumentiert durchgeführte Prüfungen.", body)]
+
+# ── 16. Spindverwaltung ──────────────────────────────────────────────────────
+chapter("Spindverwaltung")
+story += [P("Modul unter Verwaltung → Module aktivieren. Bereiche:", body), SP(2)]
 story.append(tbl([
-    ["Modus", "Wann verwenden", "Resultat", "Auto-Anlage"],
-    ["📦 Wareneingang",    "Lieferant bringt volle Flaschen",     "→ Volllager",        "✓"],
-    ["🚚 Tour / Anfrage",  "Flaschen aus Volllager für Anfrage",   "→ Unterwegs",        "✗"],
-    ["📥 Leere einsammeln","Leere Flaschen von Station holen",     "→ Leer/Unterwegs",   "✗"],
-    ["↩️ Ins Leergutlager","Leere Flaschen einlagern",            "→ Leergutlager",     "✗"],
-    ["📤 Warenausgang",    "Leere Flaschen an Lieferanten",        "→ Beim Lieferanten", "✗"],
-], [35*mm, 50*mm, 40*mm, 25*mm]))
+    ["Tab", "Inhalt"],
+    ["Anfragen", "Spind-Anfragen der Stationen: Spind zuweisen oder ablehnen"],
+    ["Übersicht", "Belegung auf einen Blick"],
+    ["Spinde", "Spinde anlegen und pflegen"],
+    ["Historie", "Vergaben und Rückgaben"],
+], [35 * mm, 135 * mm]))
+story += [P("Die Auswahlwerte für die Berufsgruppe werden unter Verwaltung → Berufsgruppen gepflegt.", body)]
 
-story += [SP(2), P("&#9632; Wareneingang: Unbekannte Barcodes werden automatisch als neue Flaschen angelegt.", note)]
+# ── 17. Raumbuch ─────────────────────────────────────────────────────────────
+chapter("Raumbuch", new_page=True)
+story += [P("Abbild der Gebäudestruktur: <b>Haus → Gebäude → Bereich/Station → Raum → Stellplatz</b>. Gebäude sind optional.", body), SP(2)]
+story.append(tbl([
+    ["Tab", "Inhalt"],
+    ["Häuser", "Standorte bzw. Häuser"],
+    ["Gebäude", "Gebäude innerhalb eines Hauses (optional)"],
+    ["Bereiche/Stationen", "Stationen und sonstige Bereiche"],
+    ["Räume", "Räume mit Raumart"],
+    ["Stellplätze", "Bettenstellplätze je Raum"],
+    ["Raumarten", "Kategorien für Räume"],
+    ["Import", "Excel-Import des gesamten Raumbuchs"],
+    ["Eigene Attribute", "Zusatzfelder für Räume, Stationen und Betten"],
+], [42 * mm, 128 * mm]))
+story += [P("17.1 Excel-Import", h2)]
+story += [P("Excel-Datei (.xlsx) auswählen; verwendet wird das Tabellenblatt mit den meisten Spalten. Spalten den Feldern zuordnen und importieren. "
+            "Felder u. a.: Haus, Gebäude (legt Gebäude automatisch an), Bereich/Station, Raumnummer, Raumbezeichnung, Etage, Stellplatz "
+            "oder <i>Stellplatz-Anzahl</i> (legt N nummerierte Stellplätze an). Zeilen ohne Pflichtfelder werden übersprungen.", body)]
 
-story += [SP(3), P("17.3 Anfragen-Workflow", h2)]
+# ── 18. Raumbuchung ──────────────────────────────────────────────────────────
+chapter("Raumbuchung")
+story += [P("Buchung gemeinsam genutzter Räume und Arbeitsplätze (Modul <i>Raumbuchung</i>).", body), SP(2)]
+story.append(tbl([
+    ["Tab", "Inhalt", "Berechtigung"],
+    ["Räume", "Buchbare Räume mit Arbeitsplätzen; einzelnen Platz oder ganzen Raum buchen; Favoriten markieren", "raumbuchung"],
+    ["Meine Buchungen", "Agenda der eigenen Buchungen, Stornieren", "raumbuchung"],
+    ["Alle Buchungen", "Übersicht aller Buchungen", "raumbuchungsadmin"],
+    ["Verwaltung", "Räume und Arbeitsplätze inklusive Ausstattung anlegen", "raumbuchungsadmin"],
+], [32 * mm, 98 * mm, 40 * mm]))
+story += [P("<b>Stellvertretung:</b> Wer für wen buchen darf (z. B. Sekretariat für Chefarzt), wird unter Verwaltung → Raumbuchung festgelegt. "
+            "Die Buchung zeigt dann sowohl die vertretene als auch die buchende Person.", body)]
+
+# ── 19. Sauerstofftransport ──────────────────────────────────────────────────
+chapter("Sauerstofftransport", new_page=True)
+story += [P("Verwaltet Sauerstoffflaschen von der Lieferung bis zur Rückgabe an den Lieferanten.", body)]
+story += [P("19.1 Status der Flaschen", h2)]
+story.append(tbl([
+    ["Status", "Bedeutung"],
+    ["Volllager", "Volle Flasche im Lager"],
+    ["Unterwegs", "Auf dem Weg zur Station"],
+    ["Auf Station", "An die Station übergeben"],
+    ["Leer/Unterwegs", "Leere Flasche auf dem Rückweg"],
+    ["Leergutlager", "Wartet auf Abholung durch den Lieferanten"],
+    ["Beim Lieferanten", "Zurückgegeben"],
+], [40 * mm, 130 * mm]))
+story += [P("19.2 Scan-Modi", h2)]
+story.append(tbl([
+    ["Modus", "Verwendung", "Ergebnis"],
+    ["Wareneingang", "Lieferant bringt volle Flaschen (unbekannte Barcodes werden angelegt)", "→ Volllager"],
+    ["Tour / Anfrage", "Flaschen für eine Anfrage aus dem Volllager", "→ Unterwegs"],
+    ["Leere einsammeln", "Leere Flaschen von der Station holen", "→ Leer/Unterwegs"],
+    ["Ins Leergutlager", "Leere Flaschen einlagern", "→ Leergutlager"],
+    ["Warenausgang", "Leere Flaschen an den Lieferanten", "→ Beim Lieferanten"],
+], [36 * mm, 94 * mm, 40 * mm]))
+story += [P("19.3 Ablauf einer Anfrage", h2)]
 story.append(tbl([
     ["Schritt", "Wer", "Aktion"],
-    ["1","Pflegepersonal",       "Meine Station → '+ Sauerstoff anfordern' → Anzahl + Typ → Senden"],
-    ["2","Sauerstofftransport",  "Tab 'Anfragen' → 'Annehmen & Scannen'"],
-    ["3","Sauerstofftransport",  "Modus 'Tour starten' → Flaschen aus Volllager scannen"],
-    ["4","Sauerstofftransport",  "'Auftrag abschließen' → Flaschen werden auf Station gebucht"],
-    ["5","System",               "Falls weniger gescannt als bestellt: Rückfrage + Anpassung der Anzahl"],
-], [15*mm, 45*mm, 100*mm]))
+    ["1", "Pflegepersonal", "Meine Station → Sauerstoff anfordern"],
+    ["2", "Transport", "Anfragen → Annehmen &amp; Scannen"],
+    ["3", "Transport", "Flaschen aus dem Volllager scannen"],
+    ["4", "Transport", "Auftrag abschließen – Flaschen werden auf die Station gebucht"],
+], [16 * mm, 36 * mm, 118 * mm]))
+story += [P("Lager, Flaschentypen und Flaschen werden unter Verwaltung → O2 gepflegt.", body)]
 
-story += [SP(3), P("17.4 Verwaltung → O2", h2)]
+# ── 20. Rücksendungen ────────────────────────────────────────────────────────
+chapter("Rücksendungen", new_page=True)
+story += [P("Stationen melden nicht benötigtes oder falsches Material zurück. Jeder Artikel hat Menge und eigenen Grund. "
+            "Nach dem Speichern öffnet sich der Begleitschein als PDF; er kann jederzeit erneut gedruckt werden.", body)]
+story += [P("20.1 Ablauf", h2)]
+story.append(tbl([
+    ["Status", "Wer", "Aktion"],
+    ["In Bearbeitung", "Lager", "Neue Rücksendung liegt sofort im Lager. Lager-Notiz und Anhänge (Bilder, PDF) möglich."],
+    ["Beim Einkauf", "Lager → Einkauf", "Weiterleiten an den Einkauf (optional mit Notiz); Einkauf trägt eigene Notiz ein"],
+    ["Zurück ans Lager", "Einkauf → Lager", "Einkauf gibt den Vorgang an das Lager zurück"],
+    ["Abgeschlossen", "Lager", "Abschluss mit Grund aus der Auswahlliste"],
+], [32 * mm, 32 * mm, 106 * mm]))
+story += [P("Die Tabs <b>Lager</b>, <b>Einkauf</b>, <b>Abgeschlossen</b> und <b>Alle</b> zeigen Zähler. Abschlussgründe werden unter "
+            "Verwaltung → Rücks.-Gründe gepflegt. Stationspersonal sieht nur die eigenen Rücksendungen.", body)]
+
+# ── 21. Wäsche ───────────────────────────────────────────────────────────────
+chapter("Kissen & Bettdecken")
+story += [P("Stationen fordern über Meine Station Kissen, Bettdecken und andere Wäscheteile an. Die Anfragen erscheinen bei Nutzern mit "
+            "<i>waesche</i> in Bett-Zentral. Die verfügbaren Typen werden unter Verwaltung → Wäschetypen gepflegt.", body)]
+
+# ── 22. Chat ─────────────────────────────────────────────────────────────────
+chapter("Stations-Chat")
+story += [P("Gemeinsamer Chat aller Stationen (Modul <i>Stations-Chat</i>, Berechtigung <i>chat</i>). Das Chatfenster ist auf jeder Seite "
+            "unten rechts erreichbar. Nachrichten werden nach der eingestellten Aufbewahrungsdauer gelöscht.", body)]
+
+# ── 23. Verwaltung ───────────────────────────────────────────────────────────
+chapter("Verwaltung", new_page=True)
+story += [P("Bereich <b>Verwaltung</b> (Berechtigung <i>verwaltung</i>):", body), SP(2)]
 story.append(tbl([
     ["Tab", "Inhalt"],
-    ["Lager",         "Lager anlegen und Häusern zuordnen (ein Lager pro Haus empfohlen)"],
-    ["Flaschentypen", "Typen anlegen, z. B. '2,5L O2', '10L O2'"],
-    ["Flaschen",      "Einzelne Flaschen mit Barcode anlegen (oder beim Wareneingang automatisch)"],
-], [30*mm, 130*mm]))
+    ["Bett-Typen", "Eigene Bett-Typen"],
+    ["Krankheitserreger", "Erreger mit Risiko, Desinfektionsmittel, Material, Schutzmaßnahmen"],
+    ["Desinfektionsmaßnahmen", "Verfahren für Bett-Zentral mit Anleitung"],
+    ["Berufsgruppen", "Auswahlwerte für Spind-Anfragen"],
+    ["Anleitungen", "Allgemeine Reinigungsanleitungen"],
+    ["Einstellungen", "Prioritätsscore, Farbschwellen, Datenhaltung"],
+    ["Design", "Farben, Schriften, App-Name, Hintergrundbild, Login-Seite"],
+    ["Module", "Module ein- und ausschalten"],
+    ["Backup", "Tägliche Sicherung auf lokalen Pfad oder Netzlaufwerk"],
+    ["O2", "Sauerstofflager, Flaschentypen, Flaschen"],
+    ["Rücks.-Gründe", "Abschlussgründe für Rücksendungen"],
+    ["Audit-Log", "Protokoll aller Änderungen"],
+    ["Wäschetypen", "Typen für Kissen &amp; Bettdecken"],
+    ["Raumbuchung", "Buchbare Räume, Arbeitsplätze und Stellvertretungen"],
+    ["Update", "Versionsprüfung und Update über GitHub (Kapitel 3)"],
+], [45 * mm, 125 * mm]))
+story += [P("Mitarbeiter, Rollen und Teams stehen unter <b>Benutzer &amp; Rollen</b>, die Gebäudestruktur unter <b>Raumbuch</b>. "
+            "Beim Anlegen eines Mitarbeiters erzeugt der Würfel-Knopf ein gut lesbares Zufallspasswort.", body)]
 
-story += [SP(3), P("17.5 Berichte Sauerstoff", h2)]
+# ── 24. Berichte ─────────────────────────────────────────────────────────────
+chapter("Berichte")
 story.append(tbl([
-    ["Bericht", "Inhalt"],
-    ["Lieferungen",  "Anzahl gelieferter Flaschen pro Station und Typ"],
-    ["Rückgaben",    "Anzahl eingesammelter leerer Flaschen pro Station"],
-    ["Alle Bewegungen","Vollständige Bewegungshistorie mit Datum und Mitarbeiter"],
-], [35*mm, 125*mm]))
-story.append(PageBreak())
+    ["Bericht", "Inhalt", "Export"],
+    ["Stationsbericht", "Aufträge einer Station im Zeitraum", "PDF"],
+    ["Bett-Reisehistorie", "Alle Stationen und Zentralaufenthalte eines Betts (Barcode)", "PDF"],
+    ["Zentral-Tagesbericht", "Kennzahlen, Verteilung nach Bett-Typ und Verfahren", "PDF je Tag oder gesamt"],
+    ["Sauerstoff", "Lieferungen, Rückgaben, Bewegungshistorie", "Anzeige"],
+    ["Rücksendungen", "Nach Station (inkl. Ø Bearbeitungszeit Lager/Einkauf), Abschlussgründe, alle Vorgänge", "PDF"],
+    ["Bettenstamm", "Betten nach Prüfstatus bzw. gesperrt", "CSV"],
+], [38 * mm, 98 * mm, 34 * mm]))
 
-# ── 18. RÜCKSENDUNGEN ───────────────────────────────────────────────────────────
-story += [P("18. Rücksendungen", h1), HR()]
-story += [P("Ermöglicht Stationen, nicht benötigtes oder falsches Material ans Lager zurückzumelden.", body), SP(2)]
-
-story += [P("18.1 Rücksendung melden (Pflegepersonal)", h2)]
+# ── 25. Sicherheit ───────────────────────────────────────────────────────────
+chapter("Sicherheit & Datensicherung", new_page=True)
+story += [P("25.1 Schutzmaßnahmen", h2)]
 story.append(tbl([
-    ["Feld", "Pflicht", "Hinweis"],
-    ["Artikel",  "Ja", "Mehrere Artikel möglich – '+' für neue Zeile"],
-    ["Menge",    "Ja", "Pro Artikel, z. B. '3 Packungen'"],
-    ["Grund",    "Ja", "Freitext: Warum wird zurückgesendet?"],
-], [35*mm, 20*mm, 105*mm]))
-
-story += [SP(2), P("Station wird automatisch aus dem Benutzerprofil übernommen.", body)]
-story += [SP(2), P("18.2 Rücksendungen bearbeiten (Verwaltung/Lager)", h2)]
+    ["Maßnahme", "Beschreibung"],
+    ["Passwörter", "bcrypt mit Cost-Factor 12"],
+    ["Anmeldung", "Signierte Tokens (JWT), Gültigkeit 12 Stunden, zufälliger Schlüssel je Installation"],
+    ["Rate-Limiting", "Login 10 Versuche / 15 Min · API 300 / Min · Passwortänderung 5 / 15 Min"],
+    ["HTTP-Header", "Helmet (Content-Security-Policy, X-Frame-Options u. a.)"],
+    ["Uploads", "Nur erlaubte Dateitypen, Prüfung von MIME-Typ und Dateisignatur, max. 10 MB"],
+    ["Zugriffsschutz", "Scope- und Besitzer-Prüfung auch bei Einzelabrufen, PDFs und Anhängen"],
+    ["Datenbank", "Ausschließlich parametrisierte Abfragen"],
+    ["Backup-Passwort", "Verschlüsselt gespeichert (AES-256-GCM)"],
+    ["Updates", "Nur von GitHub, mit SHA256-Prüfung"],
+    ["Audit-Log", "Änderungen werden protokolliert (ohne Passwörter)"],
+], [36 * mm, 134 * mm]))
+story += [P("25.2 Datensicherung", h2)]
 story.append(tbl([
-    ["Status", "Farbe", "Aktion"],
-    ["Offen",        "Gelb", "'Annehmen' – Rücksendung entgegennehmen"],
-    ["Angenommen",   "Blau", "'Abschließen' + Abschluss-Grund aus Dropdown"],
-    ["Abgeschlossen","Grün", "Abgeschlossen – kann gelöscht werden"],
-], [35*mm, 20*mm, 105*mm]))
+    ["Was", "Wie"],
+    ["Täglich automatisch", "Verwaltung → Backup: Zielpfad (lokal oder \\\\server\\freigabe), Uhrzeit, ggf. Anmeldedaten; „Jetzt sichern“ zum Testen"],
+    ["Vor jedem Update", "Automatisch nach data\\backups\\"],
+    ["Manuell", "Dienst stoppen und den Ordner data\\ kopieren"],
+    ["Aufbewahrung", "Abgeschlossene Aufträge, Audit-Log und Chat werden nach RETENTION_DAYS (Standard 90) gelöscht"],
+], [36 * mm, 134 * mm]))
+story += [P("Alvea spricht im internen Netz HTTP. Für die Kamera auf iPad/iPhone (Barcode-Scanner) ist HTTPS nötig – dafür einen "
+            "Reverse-Proxy mit Zertifikat vorschalten. Ohne HTTPS weicht Alvea auf die Kamera-App des Geräts aus.", note)]
 
-story += [SP(2), P("18.3 Abschluss-Gründe konfigurieren", h2)]
-story += [P("Verwaltung → Tab '📦 Rücks.-Gründe': eigene Gründe anlegen, bearbeiten und löschen (z. B. 'Wieder eingelagert', 'Artikel vernichtet', 'An Lieferanten zurückgesendet').", body)]
-story.append(PageBreak())
-
-# ── 19. VERWALTUNG ──────────────────────────────────────────────────────────────
-story += [P("19. Verwaltung", h1), HR()]
-story += [P("Nur für Nutzer mit der Berechtigung 'verwaltung' oder 'benutzerverwaltung'.", body), SP(2)]
+# ── 26. Konfiguration ────────────────────────────────────────────────────────
+chapter("Konfiguration")
+story += [P("Datei <b>data\\alvea.env</b> (Startmenü → Konfiguration bearbeiten). Änderungen werden nach einem Neustart des Dienstes wirksam.", body), SP(2)]
 story.append(tbl([
-    ["Tab", "Inhalt"],
-    ["Mitarbeiter",       "Nutzerverwaltung: anlegen, bearbeiten, Passwort generieren"],
-    ["Rollen",            "Rollen anlegen und 16 Berechtigungen vergeben"],
-    ["Teams",             "Teams anlegen und Bereichen zuordnen"],
-    ["Häuser",            "Krankenhäuser / Gebäude anlegen"],
-    ["Bereiche",          "Abteilungen einem Haus zuordnen"],
-    ["Stationen",         "Stationen einem Bereich zuordnen"],
-    ["Zimmer",            "Zimmer einer Station zuordnen"],
-    ["Betten",            "Platzhalterbetten anlegen (kein Barcode)"],
-    ["Bett-Typen",        "Eigene Betttypen definieren"],
-    ["Berufsgruppen",     "Dropdown-Werte für Spind-Anfragen"],
-    ["Krankheitserreger", "Keime verwalten: Name, Risiko, Desinfektion"],
-    ["Aufbereitungsarten","Verfahren für Bett-Zentral mit Anleitungen"],
-    ["Einstellungen",     "Prioritätsscore-Schwellen konfigurieren"],
-    ["Design",            "App-Design und Login-Seite anpassen"],
-    ["Module",            "Einzelne Funktionsmodule aktivieren/deaktivieren"],
-    ["Eigene Attribute",  "Zusatzfelder für Betten und Stationen definieren"],
-    ["💨 O2",             "Sauerstofflager, Flaschentypen und Flaschen verwalten"],
-    ["💾 Backup",         "Automatisches Backup auf Netzlaufwerk konfigurieren"],
-    ["📦 Rücks.-Gründe",  "Dropdown-Gründe für Rücksendungsabschluss verwalten"],
-], [45*mm, 115*mm]))
-story.append(PageBreak())
+    ["Schlüssel", "Standard", "Bedeutung"],
+    ["PORT", "37843", "Port der Weboberfläche (auch per erneutem Setup änderbar)"],
+    ["HOST", "0.0.0.0", "127.0.0.1 = nur lokal erreichbar, z. B. hinter Reverse-Proxy"],
+    ["JWT_SECRET", "zufällig", "Signaturschlüssel – geheim halten, Änderung meldet alle ab"],
+    ["JWT_EXPIRES_IN", "12h", "Gültigkeit einer Anmeldung"],
+    ["RETENTION_DAYS", "90", "Aufbewahrungsdauer in Tagen"],
+    ["CORS_ORIGIN", "–", "Zusätzlich erlaubte Adresse bei Zugriff über eine andere Domain"],
+    ["DB_FILE / UPLOAD_DIR / LOG_DIR", "data\\…", "Datenpfade"],
+    ["LOG_LEVEL", "info", "debug, info, warn oder error"],
+    ["UPDATE_REPO", "phillhf/alvea", "GitHub-Repository für Updates"],
+], [44 * mm, 30 * mm, 96 * mm]))
 
-# ── 20. BERICHTE ────────────────────────────────────────────────────────────────
-story += [P("20. Berichte", h1), HR()]
-story.append(tbl([
-    ["Bericht", "Weg", "Export"],
-    ["Stationsbericht",     "Berichte → Station + Zeitraum → Laden", "PDF"],
-    ["Bett-Reisehistorie",  "Berichte → Barcode eingeben/scannen",   "Anzeige"],
-    ["Zentral-Tagesbericht","Berichte → Von/Bis → Bericht laden",    "PDF je Tag oder Gesamtzeitraum"],
-    ["Bettenstamm-Export",  "Berichte → Filter: Prüfung / Gesperrt", "CSV"],
-    ["O2 Lieferungen",      "Berichte → Sauerstoff → Bericht laden", "Anzeige"],
-    ["O2 Rückgaben",        "Berichte → Sauerstoff → Bericht laden", "Anzeige"],
-    ["O2 Bewegungshistorie","Berichte → Sauerstoff → Bericht laden", "Anzeige"],
-], [45*mm, 75*mm, 40*mm]))
-story.append(PageBreak())
-
-# ── 21. SICHERHEIT ──────────────────────────────────────────────────────────────
-story += [P("21. Sicherheit &amp; Datensicherung", h1), HR()]
-story += [P("21.1 Sicherheitsmechanismen", h2)]
-story.append(tbl([
-    ["Mechanismus", "Beschreibung"],
-    ["Authentifizierung",   "JWT-Token (12h) + bcrypt Cost-Factor 12"],
-    ["Rate-Limiting Login", "Max. 10 Versuche / 15 Min pro IP"],
-    ["Rate-Limiting API",   "Max. 300 Anfragen / Min"],
-    ["Rate-Limiting PW",    "Max. 5 Versuche / 15 Min pro IP"],
-    ["Security-Header",     "Helmet.js (HSTS, X-Frame-Options)"],
-    ["IDOR-Schutz",         "Aufträge und Fotos scope-geprüft"],
-    ["Upload-Validierung",  "Nur JPEG, PNG, WebP, GIF; max. 10 MB; MIME + Magic-Byte"],
-    ["SQL-Injection",       "Alle Inputs via parametrisierte Queries"],
-    ["Settings-Whitelist",  "Nur erlaubte Schlüssel werden gespeichert"],
-    ["Backup-Verschlüsselung","Backup-Passwort AES-256-GCM verschlüsselt"],
-], [50*mm, 110*mm]))
-
-story += [SP(3), P("21.2 Datensicherung", h2)]
-story.append(tbl([
-    ["Was", "Wo / Wann"],
-    ["Datenbank",             "Eine SQLite-Datei – täglich auf Netzlaufwerk kopieren"],
-    ["Automatisches Backup",  "update.bat erstellt vor jedem Update eine Sicherungskopie"],
-    ["Automatisches Backup",  "Verwaltung → Backup: Netzwerkpfad + Uhrzeit konfigurieren"],
-    ["Uploads-Verzeichnis",   "uploads/ ebenfalls sichern (Fotos)"],
-    ["Logs",                  "logs/ sichern (30 Tage automatische Rotation)"],
-    ["Archivierung",          "Aufträge nach 90 Tagen automatisch archiviert (RETENTION_DAYS)"],
-], [45*mm, 115*mm]))
-
-story += [SP(3), P("21.3 Automatisches Backup einrichten", h2)]
-story.append(tbl([
-    ["Feld", "Beschreibung"],
-    ["Zielpfad",     "UNC-Pfad (\\\\server\\freigabe) oder lokaler Pfad (C:\\Backup)"],
-    ["Uhrzeit",      "Täglich zu dieser Uhrzeit (z. B. 02:00)"],
-    ["Benutzername", "Netzwerk-Benutzername (DOMAIN\\Benutzer) – leer für lokale Pfade"],
-    ["Passwort",     "Wird AES-256-GCM verschlüsselt gespeichert"],
-    ["Jetzt sichern","Manueller Test-Button"],
-], [35*mm, 125*mm]))
-story.append(PageBreak())
-
-# ── 22. KONFIGURATION ───────────────────────────────────────────────────────────
-story += [P("22. Konfiguration (backend/.env)", h1), HR()]
-story.append(tbl([
-    ["Variable", "Bedeutung / Standardwert"],
-    ["PORT",           "37843 – Port des Servers"],
-    ["HOST",           "0.0.0.0 – alle Netzwerkschnittstellen"],
-    ["DB_FILE",        "./data/bettenaufbereitung.sqlite"],
-    ["UPLOAD_DIR",     "./uploads – Foto-Uploads"],
-    ["JWT_SECRET",     "Zufällig generiert bei Installation (mind. 32 Zeichen)"],
-    ["JWT_EXPIRES_IN", "12h – Token-Gültigkeit"],
-    ["CORS_ORIGIN",    "Externe Domain bei Zugriff von außerhalb des LANs"],
-    ["RETENTION_DAYS", "90 – Aufträge nach X Tagen archivieren"],
-    ["LOG_LEVEL",      "info – debug / info / warn / error"],
-    ["LOG_DIR",        "../logs – Pfad zum Log-Verzeichnis"],
-], [50*mm, 110*mm]))
-story.append(PageBreak())
-
-# ── 23. HÄUFIGE FRAGEN ──────────────────────────────────────────────────────────
-story += [P("23. Häufige Fragen", h1), HR()]
+# ── 27. FAQ ──────────────────────────────────────────────────────────────────
+chapter("Häufige Fragen", new_page=True)
 story.append(tbl([
     ["Problem", "Lösung"],
-    ["install.bat: Node.js nicht gefunden",   "Node.js 24 LTS von nodejs.org installieren"],
-    ["install.bat: node-gyp rebuild failed",  "Node.js neu installieren, Haken bei Build Tools setzen"],
-    ["Seite nicht erreichbar",               "start.bat läuft? IP-Adresse des Servers im Browser eingeben"],
-    ["Login schlägt fehl",                   "Rate-Limit aktiv? 15 Min warten. Oder Passwort falsch."],
-    ["Tab fehlt nach Berechtigungsvergabe",  "Nutzer abmelden und neu anmelden"],
-    ["Tab 'Scheuer-Wisch' fehlt",            "Berechtigung 'zimmerreinigung' zuweisen → neu anmelden"],
-    ["Tab 'Sauerstofftransport' fehlt",      "Berechtigung 'sauerstofftransport' zuweisen → neu anmelden"],
-    ["Tab 'Rücksendungen' fehlt",            "Berechtigung 'verwaltung' erforderlich"],
-    ["Barcode nicht im Autocomplete",        "Barcode im Bettenstamm anlegen oder per Wareneingang scannen"],
-    ["O2-Scan: Ungültige Aktion",            "Falscher Modus gewählt – Flasche ist in anderem Status"],
-    ["O2-Anfrage: Fehler 500",               "Migration 25/26 prüfen – FK-Constraints wurden entfernt"],
-    ["Dashboard zeigt keine Stationen",      "Alle Aufträge erledigt – fertige Stationen werden ausgeblendet"],
-    ["update.bat schlägt fehl",              "Log prüfen: Update\\update-log.txt – Fehlermeldung weiterleiten"],
-    ["Rücksendung: JSON im Titel sichtbar",  "Update auf v4.0 – getArtikelList() parst alte Einträge korrekt"],
-    ["Backup schlägt fehl",                  "Netzwerkpfad und Credentials in Verwaltung → Backup prüfen"],
-    ["Log-Datei nicht gefunden",             "../logs/ Verzeichnis – relativ zum Installationsordner"],
-], [65*mm, 95*mm]))
+    ["Alvea ist nicht erreichbar", "Dienst „Alvea“ in services.msc prüfen; Protokolle in data\\logs (alvea-service.*.log, app.log)"],
+    ["Nur auf dem Server erreichbar", "Firewall-Freigabe für den Port fehlt – Setup erneut ausführen und Option wählen"],
+    ["Dienst startet nicht nach Port-Änderung", "Port belegt? Anderen Port in data\\alvea.env eintragen und Dienst neu starten"],
+    ["Login schlägt fehl", "Nach 10 Fehlversuchen 15 Minuten warten; Passwort prüfen"],
+    ["Menüpunkt fehlt", "Berechtigung der Rolle und Modul prüfen, danach ab- und wieder anmelden"],
+    ["Mitarbeiter sieht keine Aufträge", "Zuweisung zu Station, Bereich oder Team prüfen"],
+    ["Update: „Update-Prüfung nicht möglich“", "Server erreicht github.com nicht – Setup manuell herunterladen und ausführen"],
+    ["Update fehlgeschlagen", "Meldung in Verwaltung → Update und data\\logs\\update.log; Datenbank-Sicherung liegt in data\\backups"],
+    ["Barcode nicht in der Auswahl", "Bett im Bettenstamm anlegen bzw. Flasche per Wareneingang scannen"],
+    ["O2-Scan: ungültige Aktion", "Falscher Scan-Modus – die Flasche hat einen anderen Status"],
+    ["Backup schlägt fehl", "Zielpfad und Anmeldedaten unter Verwaltung → Backup prüfen"],
+    ["Kamera auf dem iPad geht nicht", "HTTPS fehlt – siehe Kapitel 25"],
+], [58 * mm, 112 * mm]))
 
-doc.build(story, onFirstPage=page_num, onLaterPages=page_num)
+assert chapter_no == len(CHAPTERS), "Inhaltsverzeichnis und Kapitel stimmen nicht überein"
+
+doc = SimpleDocTemplate(OUT, pagesize=A4, leftMargin=20 * mm, rightMargin=20 * mm, topMargin=18 * mm, bottomMargin=18 * mm,
+                        title=f"Alvea {VERSION} – Benutzer- und Installationshandbuch", author="Alvea Contributors")
+doc.build(story, onFirstPage=page_deco, onLaterPages=page_deco)
 print(f"PDF erstellt: {OUT}")

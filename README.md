@@ -55,6 +55,10 @@ Alle Module lassen sich unter **Verwaltung → 🧩 Module** einzeln ein- und au
 
 Außerdem: Rollen mit 22 Einzelberechtigungen und Bereichs-Scope, Barcode-Scanner per Kamera, Design-Anpassung (Farben, Schriften, Hintergrund), automatische Backups auf Netzlaufwerk, Audit-Log, Offline-Anzeige (PWA).
 
+Ausführliche Anleitung für Anwender und Administratoren: **[Benutzer- und Installationshandbuch (PDF)](docs/Alvea_Benutzerhandbuch.pdf)**.
+
+Ausführliche Anleitung für Anwender und Administratoren: **[Benutzer- und Installationshandbuch (PDF)](docs/Alvea_Benutzerhandbuch.pdf)**.
+
 ---
 
 ## Installation
