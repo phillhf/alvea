@@ -1,6 +1,6 @@
 {
   "name": "alvea-backend",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "private": true,
   "description": "Alvea – All-in-One Node Server (API + SPA + SQLite)",
   "main": "dist/server.js",

@@ -742,16 +742,16 @@ export default function MeineStation() {
 
   return (
     <div className="space-y-5">
-      {showDefect   && <DefectModal   stations={stations} onClose={() => setShowDefect(false)} />}
+      {showDefect   && <DefectModal   stations={stations} onClose={() => { setShowDefect(false); load(); }} />}
       {showReinigung && <ReinigungModal stations={stations}
         onClose={() => setShowReinigung(false)}
         onSaved={() => { setShowReinigung(false); load(); }} />}
       {showZimmer && <ScheuernWischModal stations={stations}
         onClose={() => setShowZimmer(false)}
         onSaved={() => { setShowZimmer(false); load(); }} />}
-      {showSpind && <SpindAnfrageModal stations={stations} onClose={() => setShowSpind(false)} />}
-      {showO2    && <O2AnfrageModal   stations={stations} onClose={() => setShowO2(false)} />}
-      {showRuecksendung && <RuecksendungModal stations={stations} onClose={() => setShowRuecksendung(false)} />}
+      {showSpind && <SpindAnfrageModal stations={stations} onClose={() => { setShowSpind(false); load(); }} />}
+      {showO2    && <O2AnfrageModal   stations={stations} onClose={() => { setShowO2(false); load(); }} />}
+      {showRuecksendung && <RuecksendungModal stations={stations} onClose={() => { setShowRuecksendung(false); load(); }} />}
       {showWaesche && <WaescheModal stations={stations} onClose={() => { setShowWaesche(false); load(); }} />}
 
       {/* ── Hero-Header ── */}

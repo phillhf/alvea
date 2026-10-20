@@ -39,6 +39,18 @@ jobs:
         run: |
           npm ci --no-audit --no-fund
           npm test
+          npm run build
+
+      - name: Oberflächentests (Playwright)
+        shell: pwsh
+        run: |
+          Push-Location frontend; npm ci --no-audit --no-fund; npm run build; Pop-Location
+          Push-Location e2e
+          npm ci --no-audit --no-fund
+          npx playwright install chromium
+          npx playwright test
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          Pop-Location
 
       - name: Setup bauen
         shell: pwsh

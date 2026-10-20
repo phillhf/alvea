@@ -18,10 +18,13 @@ export function registerSW() {
         });
       });
 
-      // Nach SW-Wechsel Seite neu laden
+      // Nach SW-Wechsel Seite neu laden – aber nur bei einem Update. Beim ersten
+      // Besuch übernimmt der SW die Seite ebenfalls (controllerchange); ein Neuladen
+      // würde dann z. B. halb ausgefüllte Login-Felder löschen.
       let refreshing = false;
+      const hadController = !!navigator.serviceWorker.controller;
       navigator.serviceWorker.addEventListener("controllerchange", () => {
-        if (!refreshing) {
+        if (hadController && !refreshing) {
           refreshing = true;
           window.location.reload();
         }

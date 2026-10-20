@@ -3,6 +3,17 @@
 Alle wichtigen Änderungen an diesem Projekt werden hier dokumentiert.
 Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/), Versionen folgen [Semantic Versioning](https://semver.org/lang/de/).
 
+## [1.2.2] - 2026-10-20
+
+### Behoben
+- **Login auf neuen Geräten:** Beim allerersten Aufruf lud sich die Seite nach dem Einrichten der Offline-Funktion (Service Worker) einmal neu – bereits eingetippte Zugangsdaten waren dann weg. Neu geladen wird jetzt nur noch bei einem Update.
+- **Meine Station:** Neue Defektmeldungen, Spind-, Sauerstoff- und Rücksendungs-Anfragen erschienen erst nach bis zu 30 Sekunden in der Liste; jetzt sofort nach dem Absenden.
+
+### Neu
+- **Oberflächentests mit Playwright** (`e2e/`): Ein echter Browser klickt Login, Pflege-, Reinigungs- und Verwaltungsabläufe gegen einen Server mit frischer Testdatenbank durch – am Desktop und in Smartphone-Größe. Sie laufen zusammen mit den Backend-Tests bei jedem Push und vor jedem Release.
+
+---
+
 ## [1.2.1] - 2026-10-20
 
 ### Sicherheit

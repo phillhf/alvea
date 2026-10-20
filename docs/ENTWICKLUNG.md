@@ -68,7 +68,25 @@ Die Backend-Tests (`backend/src/__tests__/`, Jest + Supertest) starten die App o
 - Rechte für Verwaltungsfunktionen, Einstellungen ohne Backup-Daten
 - Migrationen: neue Datenbank, Wiederholbarkeit, Update einer 1.0.0-Datenbank
 
-Die Tests laufen in GitHub Actions bei jedem Push (`ci.yml`) und vor jedem Release (`release.yml`) – ein Release mit roten Tests wird nicht gebaut. Neue Funktionen bitte mit Tests ergänzen; neue Migrationen erhöhen `LATEST` in `migrations.test.ts`.
+### Oberflächentests (Playwright)
+
+```bash
+cd backend && npm run build
+cd ../frontend && npm run build
+cd ../e2e && npm install && npx playwright install chromium
+npx playwright test            # oder: npm run test:headed (Browser sichtbar)
+```
+
+`e2e/` startet den gebauten Server mit frischer Testdatenbank (`start-server.js`, Port 38790), legt in `global-setup.ts` Testdaten an (Station 1A für Pflege, Station 2B für Reinigung) und speichert je Rolle einen angemeldeten Zustand. Getestet wird mit Chromium am Desktop und – für Tests mit `@mobil` im Namen – in Smartphone-Größe:
+
+- Login-Formular, Module sofort nach dem Login aktiv
+- Pflege: Bettenreinigung per Bett-Kachel, Defekt mit Zimmer
+- Reinigung: kompletter 4-Schritte-Ablauf inkl. Barcode
+- Verwaltung: Übersicht, Lösch-Dialog, Update-Bereich
+
+Bei Fehlern legt Playwright Screenshot und Ablaufprotokoll in `e2e/test-results/` ab (`npx playwright show-trace …`); in GitHub Actions als Artefakt „playwright-report“.
+
+Beide Testarten laufen in GitHub Actions bei jedem Push (`ci.yml`) und vor jedem Release (`release.yml`) – ein Release mit roten Tests wird nicht gebaut. Neue Funktionen bitte mit Tests ergänzen; neue Migrationen erhöhen `LATEST` in `migrations.test.ts`.
 
 ## Datenbank-Regeln
 
