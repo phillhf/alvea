@@ -34,6 +34,12 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
 
+      - name: Backend-Tests
+        working-directory: backend
+        run: |
+          npm ci --no-audit --no-fund
+          npm test
+
       - name: Setup bauen
         shell: pwsh
         run: ./installer/build.ps1 -ExpectedVersion "${{ github.ref_name }}"

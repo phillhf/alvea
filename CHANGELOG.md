@@ -3,6 +3,16 @@
 Alle wichtigen Änderungen an diesem Projekt werden hier dokumentiert.
 Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/), Versionen folgen [Semantic Versioning](https://semver.org/lang/de/).
 
+## [1.2.1] - 2026-10-20
+
+### Sicherheit
+- **Aufträge fremder Stationen:** Reinigungskräfte konnten über die Schnittstelle Aufträge anderer Stationen annehmen, und Stationspersonal konnte Reinigungen für fremde Stationen anfordern. Anlegen und Annehmen prüfen jetzt – wie das Bearbeiten – die zugewiesenen Stationen.
+
+### Neu
+- **Automatische Tests** für das Backend (33 Tests): Anmeldung, kompletter Ablauf der Bettenaufbereitung, Datenisolation zwischen Stationen, Rechte, Einstellungen, Defektmeldungen, Rücksendungen und Datenbank-Migrationen. Sie laufen bei jedem Push und vor jedem Release; ein Release mit fehlschlagenden Tests wird nicht gebaut.
+
+---
+
 ## [1.2.0] - 2026-10-20
 Bedienung überarbeitet – weniger Klicks in den täglichen Abläufen.
 

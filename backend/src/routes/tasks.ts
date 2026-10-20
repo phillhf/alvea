@@ -10,6 +10,17 @@ import { audit } from "../services/audit";
 import { getAreaScope, getStationScope } from "../services/scope";
 import { UPLOAD_DIR } from "../config/paths";
 
+/** Liegt der Raum außerhalb der Stationen, auf die der Nutzer Zugriff hat? */
+function roomOutOfScope(req: AuthedRequest, roomId: string | null): boolean {
+  const scope = getAreaScope(req.user!.sub, req.user!.permissions);
+  if (scope === null) return false; // Vollzugriff
+  if (!roomId) return true;
+  const row = query<{ area_id: string | null }>(
+    `SELECT COALESCE(area_id, station_id) AS area_id FROM rooms WHERE id = $1`, [roomId]
+  ).rows[0];
+  return !row?.area_id || !scope.includes(row.area_id);
+}
+
 const router = Router();
 router.use(authRequired);
 
@@ -241,6 +252,11 @@ router.post("/", requirePermission("auftraege_erstellen", "bettenaufbereitung_ze
       if (active.length) throw new HttpError(409, "active_task_exists");
     }
 
+    // Nur für Betten/Räume der eigenen Stationen (Zentral hat keinen Stationsbezug)
+    if (d.category !== "bed_cleaning_zentral" && roomOutOfScope(req, roomId)) {
+      throw new HttpError(403, "forbidden");
+    }
+
     const id = newId();
     q(
       `INSERT INTO tasks (id,category,bed_id,room_id,bed_type_id,aufbereitungsart_id,is_iso,cleaning_type,pathogens,priority,notes,scanned_barcode,created_by,wunschtermin)
@@ -273,11 +289,14 @@ router.post("/", requirePermission("auftraege_erstellen", "bettenaufbereitung_ze
 // ================= CLAIM: Mitarbeiter nimmt Auftrag an sich =================
 router.post("/:id/claim", requirePermission("bettenaufbereitung", "bettenaufbereitung_zentral", "zimmerreinigung", "verwaltung"), (req: AuthedRequest, res) => {
   const r = transaction((q) => {
-    const { rows } = q<{ status: string; assigned_to: string | null; bed_id: string | null; category: string }>(
-      `SELECT status, assigned_to, bed_id, category FROM tasks WHERE id = $1`, [req.params.id]
+    const { rows } = q<{ status: string; assigned_to: string | null; bed_id: string | null; category: string; room_id: string | null }>(
+      `SELECT status, assigned_to, bed_id, category, room_id FROM tasks WHERE id = $1`, [req.params.id]
     );
     if (!rows.length) throw new HttpError(404, "task_not_found");
     const t = rows[0];
+    if (t.category !== "bed_cleaning_zentral" && roomOutOfScope(req, t.room_id)) {
+      throw new HttpError(403, "forbidden");
+    }
 
     // Berechtigungsprüfung: richtiger Tab für die Auftrags-Kategorie
     const perms = req.user!.permissions;

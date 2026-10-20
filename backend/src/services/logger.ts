@@ -11,6 +11,12 @@ let _pino: any = null;
 
 function getPino() {
   if (_pino) return _pino;
+  // Tests: kein Pino-Worker-Thread (hielte Jest offen), Ausgaben unterdrücken
+  if (process.env.NODE_ENV === "test") {
+    const noop = () => {};
+    _pino = { info: noop, warn: noop, error: noop, debug: noop, child: () => _pino };
+    return _pino;
+  }
   try {
     const pino = require("pino");
     const targets: any[] = [];

@@ -53,6 +53,23 @@ npm install
 npm run dev               # http://localhost:5173, /api → Backend
 ```
 
+## Tests
+
+```bash
+cd backend
+npm test
+```
+
+Die Backend-Tests (`backend/src/__tests__/`, Jest + Supertest) starten die App ohne Port gegen eine frische SQLite-Datenbank im Temp-Ordner (`setup.ts`) und legen ihre Testdaten selbst über die API an (`helpers.ts`: Haus, Station A und B, Pflege- und Reinigungskräfte je Station). Abgedeckt sind u. a.:
+
+- Anmeldung, Token-Prüfung, Versionsvergleich
+- kompletter Ablauf einer Bettenaufbereitung inkl. Bettstatus und Barcode beim Abschluss
+- Datenisolation zwischen Stationen (Aufträge sehen, anlegen, annehmen, ändern; Rücksendungen, Begleitschein)
+- Rechte für Verwaltungsfunktionen, Einstellungen ohne Backup-Daten
+- Migrationen: neue Datenbank, Wiederholbarkeit, Update einer 1.0.0-Datenbank
+
+Die Tests laufen in GitHub Actions bei jedem Push (`ci.yml`) und vor jedem Release (`release.yml`) – ein Release mit roten Tests wird nicht gebaut. Neue Funktionen bitte mit Tests ergänzen; neue Migrationen erhöhen `LATEST` in `migrations.test.ts`.
+
 ## Datenbank-Regeln
 
 Diese Regeln stammen aus realen Fehlern – bitte einhalten:

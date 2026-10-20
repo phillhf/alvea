@@ -30,7 +30,7 @@ import systemRouter from "./routes/system";
 // Migrationen + Modul-Setup vor allen Routes
 migrate();
 ensureWaesche();
-initBackupScheduler();
+if (process.env.NODE_ENV !== "test") initBackupScheduler();
 
 import authRoutes      from "./routes/auth";
 import userRoutes      from "./routes/users";
@@ -211,7 +211,8 @@ function pruneOld() {
 const PORT = Number(process.env.PORT || 37843);
 const HOST = process.env.HOST || "0.0.0.0";
 
-app.listen(PORT, HOST, () => {
+// In Tests (supertest) wird nur die App importiert – kein Port, keine Timer
+if (require.main === module) app.listen(PORT, HOST, () => {
   const addrs = getLanAddresses();
 
   // Lesbarer Startbanner in der Konsole (Breite dynamisch berechnet)

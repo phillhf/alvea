@@ -5,6 +5,7 @@ import crypto from "crypto";
 
 // Logger lazy importieren (wird nach DB-Init geladen)
 function log(msg: string) {
+  if (process.env.NODE_ENV === "test") return; // Testausgabe nicht fluten
   try { require("./logger").migrateLogger.info(msg); } catch { console.log("[migrate]", msg); }
 }
 function logWarn(msg: string) {

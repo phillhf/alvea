@@ -13,11 +13,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version-file: .node-version
-      - name: Backend bauen
+      - name: Backend bauen und testen
         working-directory: backend
         run: |
           npm ci --no-audit --no-fund
           npm run build
+          npm test
       - name: Frontend bauen
         working-directory: frontend
         run: |
