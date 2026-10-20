@@ -19,9 +19,6 @@ export type Permission =
   | "spindverwaltung"
   | "waesche"
   | "chat"
-  | "raumbuchung"
-  | "raumbuchung_stellvertretung"
-  | "raumbuchungsadmin"
   | "verwaltung";
 
 export const ALL_PERMISSIONS: Permission[] = [
@@ -41,9 +38,6 @@ export const ALL_PERMISSIONS: Permission[] = [
   "spindverwaltung",
   "waesche",
   "chat",
-  "raumbuchung",
-  "raumbuchung_stellvertretung",
-  "raumbuchungsadmin",
   "stationspersonal",
   "auftraege_erstellen",
   "verwaltung",

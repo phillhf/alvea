@@ -19,7 +19,7 @@ Technische Doku für alle, die an Alvea arbeiten. Für Installation und Bedienun
 ```
 backend/
   src/server.ts          Express-App: Middleware, Routen, SPA-Auslieferung
-  src/config/db.ts       DB-Verbindung, ALLE Migrationen (v1 … v45), ensureWaesche()
+  src/config/db.ts       DB-Verbindung, ALLE Migrationen (v1 … v46), ensureWaesche()
   src/config/paths.ts    Zentrale Pfade (DB, Uploads, Logs, Frontend) + Programmversion
   src/routes/*.ts        Eine Datei pro API-Bereich (export default router)
   src/routes/system.ts   Version + Update über GitHub-Releases

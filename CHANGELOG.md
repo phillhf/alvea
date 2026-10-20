@@ -3,6 +3,18 @@
 Alle wichtigen Änderungen an diesem Projekt werden hier dokumentiert.
 Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/), Versionen folgen [Semantic Versioning](https://semver.org/lang/de/).
 
+## [1.1.0] - 2026-10-20
+
+### Entfernt
+- **Modul Raumbuchung** (Buchung gemeinsam genutzter Räume und Arbeitsplätze, Stellvertretungen, Favoriten, Agenda) wurde vollständig entfernt – inklusive Menüpunkt, Verwaltungs-Tab und API (`/api/shared-rooms`, `/api/shared-bookings`, `/api/shared-delegates`).
+- Berechtigungen `raumbuchung`, `raumbuchung_stellvertretung` und `raumbuchungsadmin` entfernt (jetzt 19 Berechtigungen).
+
+### Hinweis zum Update
+- Die Datenbank-Migration v46 löscht beim Update die Raumbuchungs-Tabellen samt aller Buchungen, entfernt das Modul und streicht die drei Berechtigungen aus allen Rollen. Die Datenbank wird vor dem Update automatisch gesichert (`dataackups\`).
+- Das **Raumbuch** (Häuser, Gebäude, Stationen, Räume, Stellplätze) ist davon nicht betroffen.
+
+---
+
 ## [1.0.0] - 2026-10-20
 Erste öffentliche Version unter dem neuen Namen **Alvea** (vorher *OpenClinic*, davor *Betten & Entlassreinigung*).
 

@@ -26,7 +26,6 @@ function SmartHome() {
     if (can("betten_reparatur"))           return <Navigate to="/instandsetzung" replace />;
     if (can("berichte"))                   return <Navigate to="/reports" replace />;
     if (can("dashboard"))                  return <Navigate to="/dashboard" replace />;
-    if (can("raumbuchung") || can("raumbuchungsadmin")) return <Navigate to="/raumbuchung" replace />;
   }
   return <BedReprocessing />;
 }
@@ -52,7 +51,6 @@ const Meldungen                  = lazy(() => import("./pages/Meldungen"));
 const Spindverwaltung            = lazy(() => import("./pages/Spindverwaltung"));
 const Raumbuch                   = lazy(() => import("./pages/Raumbuch"));
 const Ruecksendungen             = lazy(() => import("./pages/Ruecksendungen"));
-const Raumbuchung                = lazy(() => import("./pages/Raumbuchung"));
 const BenutzerRollen             = lazy(() => import("./pages/BenutzerRollen"));
 const MeineStation               = lazy(() => import("./pages/MeineStation"));
 
@@ -145,11 +143,6 @@ export default function App() {
         <Route path="/ruecksendungen" element={
           <ProtectedRoute anyOf={["verwaltung", "lager"]}>
             <Suspense fallback={<PageLoader />}><Ruecksendungen /></Suspense>
-          </ProtectedRoute>
-        } />
-        <Route path="/raumbuchung" element={
-          <ProtectedRoute anyOf={["raumbuchung", "raumbuchungsadmin", "verwaltung"]}>
-            <Suspense fallback={<PageLoader />}><Raumbuchung /></Suspense>
           </ProtectedRoute>
         } />
         <Route path="/benutzer-rollen" element={

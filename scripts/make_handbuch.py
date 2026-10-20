@@ -114,7 +114,7 @@ story += [
     SP(6),
     P("Benutzer- und Installationshandbuch", cover_sub),
     SP(3),
-    P("Bettenaufbereitung · Zimmerreinigung · Sauerstoff · Rücksendungen · Wäsche · Spinde · Raumbuchung", cover_meta),
+    P("Bettenaufbereitung · Zimmerreinigung · Sauerstoff · Rücksendungen · Wäsche · Spinde", cover_meta),
     SP(14),
     P(f"Programmversion {VERSION}  ·  Stand {STAND}", cover_meta),
     SP(2),
@@ -128,7 +128,7 @@ CHAPTERS = [
     "Rollen & Berechtigungen", "Erste Schritte", "Benutzeroberfläche & Navigation",
     "Bettenaufbereitung (dezentral)", "Bett-Zentral", "Scheuer-Wisch",
     "Meine Station (Pflegepersonal)", "Dashboard", "Meldungen", "Instandsetzung",
-    "Bettenstamm und Betten P&W", "Spindverwaltung", "Raumbuch", "Raumbuchung",
+    "Bettenstamm und Betten P&W", "Spindverwaltung", "Raumbuch",
     "Sauerstofftransport", "Rücksendungen", "Kissen & Bettdecken", "Stations-Chat",
     "Verwaltung", "Berichte", "Sicherheit & Datensicherung", "Konfiguration", "Häufige Fragen",
 ]
@@ -166,7 +166,6 @@ story.append(tbl([
     ["Bettenstamm / Betten P&W", "Physische Betten mit Barcode, Prüftermine und Wartung"],
     ["Spindverwaltung", "Spinde, Spind-Anfragen, Vergabe und Historie"],
     ["Raumbuch", "Haus → Gebäude → Station/Bereich → Raum → Stellplatz, inklusive Excel-Import"],
-    ["Raumbuchung", "Gemeinsam genutzte Räume und Arbeitsplätze buchen, Stellvertretung, Favoriten"],
     ["Sauerstofftransport", "Flaschenlogistik vom Wareneingang bis zur Rückgabe an den Lieferanten"],
     ["Rücksendungen", "Material-Rücksendungen von Station über Lager und Einkauf bis zum Abschluss"],
     ["Kissen & Bettdecken", "Wäsche-Anfragen der Stationen"],
@@ -281,9 +280,9 @@ story += [P("Der alte Dienst wird gestoppt und deaktiviert, aber nicht gelöscht
 
 # ── 5. Rollen & Berechtigungen ───────────────────────────────────────────────
 chapter("Rollen & Berechtigungen", new_page=True)
-story += [P("Rollen werden unter <b>Benutzer &amp; Rollen → Rollen</b> frei angelegt. Jede Rolle erhält eine Auswahl aus 22 Berechtigungen. "
+story += [P("Rollen werden unter <b>Benutzer &amp; Rollen → Rollen</b> frei angelegt. Jede Rolle erhält eine Auswahl aus 19 Berechtigungen. "
             "Nach einer Änderung muss sich der Nutzer neu anmelden.", body)]
-story += [P("5.1 Die 22 Berechtigungen", h2)]
+story += [P("5.1 Die 19 Berechtigungen", h2)]
 story.append(tbl([
     ["Berechtigung", "Zugriff"],
     ["bettenaufbereitung", "Stationsübersicht – dezentrale Aufträge annehmen und bearbeiten"],
@@ -300,9 +299,6 @@ story.append(tbl([
     ["lager", "Rücksendungen bearbeiten (Lager/Einkauf)"],
     ["waesche", "Kissen &amp; Bettdecken – Anfragen bearbeiten"],
     ["spindverwaltung", "Spindverwaltung"],
-    ["raumbuchung", "Räume und Arbeitsplätze buchen"],
-    ["raumbuchung_stellvertretung", "Für andere Personen buchen (laut Stellvertretungs-Zuordnung)"],
-    ["raumbuchungsadmin", "Buchbare Räume und Arbeitsplätze verwalten, alle Buchungen sehen"],
     ["meldungen", "Meldungen erstellen, bearbeiten, löschen"],
     ["chat", "Stations-Chat"],
     ["raumbuch", "Raumbuch bearbeiten und importieren"],
@@ -323,8 +319,7 @@ story.append(tbl([
     ["Haustechnik", "betten_reparatur, bettenstamm, betten_pw"],
     ["Sauerstofftransport", "sauerstofftransport"],
     ["Lager / Einkauf", "lager"],
-    ["Sekretariat", "raumbuchung, raumbuchung_stellvertretung"],
-    ["Administrator", "alle 22 Berechtigungen"],
+    ["Administrator", "alle 19 Berechtigungen"],
 ], [48 * mm, 122 * mm]))
 story += [P("Pflegepersonal kann über Meine Station Scheuer-Wisch beauftragen, ohne selbst <i>zimmerreinigung</i> zu besitzen.", note)]
 
@@ -339,7 +334,7 @@ story.append(tbl([
     ["5", "Benutzer &amp; Rollen → Mitarbeiter anlegen, Rolle und Station/Bereich zuweisen"],
     ["6", "Verwaltung → Desinfektionsmaßnahmen und Bett-Typen für Bett-Zentral pflegen"],
     ["7", "Bettenstamm: physische Betten mit Barcode und Prüftermin anlegen"],
-    ["8", "Je nach Modul: O2-Lager und Flaschentypen, Rücksendungs-Gründe, Wäschetypen, Berufsgruppen (Spinde), buchbare Räume"],
+    ["8", "Je nach Modul: O2-Lager und Flaschentypen, Rücksendungs-Gründe, Wäschetypen, Berufsgruppen (Spinde)"],
     ["9", "Verwaltung → <b>Backup</b>: tägliche Sicherung auf ein Netzlaufwerk einrichten"],
     ["10", "Verwaltung → <b>Design</b>: Farben, Logo-Text und Login-Seite anpassen"],
 ], [16 * mm, 154 * mm]))
@@ -362,7 +357,6 @@ story.append(tbl([
     ["Spindverwaltung", "spindverwaltung oder verwaltung"],
     ["Raumbuch", "raumbuch oder verwaltung"],
     ["Rücksendungen", "lager oder verwaltung"],
-    ["Raumbuchung", "raumbuchung, raumbuchungsadmin oder verwaltung"],
     ["Benutzer &amp; Rollen", "benutzerverwaltung oder verwaltung"],
     ["Verwaltung", "verwaltung"],
 ], [70 * mm, 100 * mm]))
@@ -487,23 +481,10 @@ story += [P("Excel-Datei (.xlsx) auswählen; verwendet wird das Tabellenblatt mi
             "Felder u. a.: Haus, Gebäude (legt Gebäude automatisch an), Bereich/Station, Raumnummer, Raumbezeichnung, Etage, Stellplatz "
             "oder <i>Stellplatz-Anzahl</i> (legt N nummerierte Stellplätze an). Zeilen ohne Pflichtfelder werden übersprungen.", body)]
 
-# ── 18. Raumbuchung ──────────────────────────────────────────────────────────
-chapter("Raumbuchung")
-story += [P("Buchung gemeinsam genutzter Räume und Arbeitsplätze (Modul <i>Raumbuchung</i>).", body), SP(2)]
-story.append(tbl([
-    ["Tab", "Inhalt", "Berechtigung"],
-    ["Räume", "Buchbare Räume mit Arbeitsplätzen; einzelnen Platz oder ganzen Raum buchen; Favoriten markieren", "raumbuchung"],
-    ["Meine Buchungen", "Agenda der eigenen Buchungen, Stornieren", "raumbuchung"],
-    ["Alle Buchungen", "Übersicht aller Buchungen", "raumbuchungsadmin"],
-    ["Verwaltung", "Räume und Arbeitsplätze inklusive Ausstattung anlegen", "raumbuchungsadmin"],
-], [32 * mm, 98 * mm, 40 * mm]))
-story += [P("<b>Stellvertretung:</b> Wer für wen buchen darf (z. B. Sekretariat für Chefarzt), wird unter Verwaltung → Raumbuchung festgelegt. "
-            "Die Buchung zeigt dann sowohl die vertretene als auch die buchende Person.", body)]
-
-# ── 19. Sauerstofftransport ──────────────────────────────────────────────────
+# ── 18. Sauerstofftransport ──────────────────────────────────────────────────
 chapter("Sauerstofftransport", new_page=True)
 story += [P("Verwaltet Sauerstoffflaschen von der Lieferung bis zur Rückgabe an den Lieferanten.", body)]
-story += [P("19.1 Status der Flaschen", h2)]
+story += [P("18.1 Status der Flaschen", h2)]
 story.append(tbl([
     ["Status", "Bedeutung"],
     ["Volllager", "Volle Flasche im Lager"],
@@ -513,7 +494,7 @@ story.append(tbl([
     ["Leergutlager", "Wartet auf Abholung durch den Lieferanten"],
     ["Beim Lieferanten", "Zurückgegeben"],
 ], [40 * mm, 130 * mm]))
-story += [P("19.2 Scan-Modi", h2)]
+story += [P("18.2 Scan-Modi", h2)]
 story.append(tbl([
     ["Modus", "Verwendung", "Ergebnis"],
     ["Wareneingang", "Lieferant bringt volle Flaschen (unbekannte Barcodes werden angelegt)", "→ Volllager"],
@@ -522,7 +503,7 @@ story.append(tbl([
     ["Ins Leergutlager", "Leere Flaschen einlagern", "→ Leergutlager"],
     ["Warenausgang", "Leere Flaschen an den Lieferanten", "→ Beim Lieferanten"],
 ], [36 * mm, 94 * mm, 40 * mm]))
-story += [P("19.3 Ablauf einer Anfrage", h2)]
+story += [P("18.3 Ablauf einer Anfrage", h2)]
 story.append(tbl([
     ["Schritt", "Wer", "Aktion"],
     ["1", "Pflegepersonal", "Meine Station → Sauerstoff anfordern"],
@@ -532,11 +513,11 @@ story.append(tbl([
 ], [16 * mm, 36 * mm, 118 * mm]))
 story += [P("Lager, Flaschentypen und Flaschen werden unter Verwaltung → O2 gepflegt.", body)]
 
-# ── 20. Rücksendungen ────────────────────────────────────────────────────────
+# ── 19. Rücksendungen ────────────────────────────────────────────────────────
 chapter("Rücksendungen", new_page=True)
 story += [P("Stationen melden nicht benötigtes oder falsches Material zurück. Jeder Artikel hat Menge und eigenen Grund. "
             "Nach dem Speichern öffnet sich der Begleitschein als PDF; er kann jederzeit erneut gedruckt werden.", body)]
-story += [P("20.1 Ablauf", h2)]
+story += [P("19.1 Ablauf", h2)]
 story.append(tbl([
     ["Status", "Wer", "Aktion"],
     ["In Bearbeitung", "Lager", "Neue Rücksendung liegt sofort im Lager. Lager-Notiz und Anhänge (Bilder, PDF) möglich."],
@@ -547,17 +528,17 @@ story.append(tbl([
 story += [P("Die Tabs <b>Lager</b>, <b>Einkauf</b>, <b>Abgeschlossen</b> und <b>Alle</b> zeigen Zähler. Abschlussgründe werden unter "
             "Verwaltung → Rücks.-Gründe gepflegt. Stationspersonal sieht nur die eigenen Rücksendungen.", body)]
 
-# ── 21. Wäsche ───────────────────────────────────────────────────────────────
+# ── 20. Wäsche ───────────────────────────────────────────────────────────────
 chapter("Kissen & Bettdecken")
 story += [P("Stationen fordern über Meine Station Kissen, Bettdecken und andere Wäscheteile an. Die Anfragen erscheinen bei Nutzern mit "
             "<i>waesche</i> in Bett-Zentral. Die verfügbaren Typen werden unter Verwaltung → Wäschetypen gepflegt.", body)]
 
-# ── 22. Chat ─────────────────────────────────────────────────────────────────
+# ── 21. Chat ─────────────────────────────────────────────────────────────────
 chapter("Stations-Chat")
 story += [P("Gemeinsamer Chat aller Stationen (Modul <i>Stations-Chat</i>, Berechtigung <i>chat</i>). Das Chatfenster ist auf jeder Seite "
             "unten rechts erreichbar. Nachrichten werden nach der eingestellten Aufbewahrungsdauer gelöscht.", body)]
 
-# ── 23. Verwaltung ───────────────────────────────────────────────────────────
+# ── 22. Verwaltung ───────────────────────────────────────────────────────────
 chapter("Verwaltung", new_page=True)
 story += [P("Bereich <b>Verwaltung</b> (Berechtigung <i>verwaltung</i>):", body), SP(2)]
 story.append(tbl([
@@ -575,13 +556,12 @@ story.append(tbl([
     ["Rücks.-Gründe", "Abschlussgründe für Rücksendungen"],
     ["Audit-Log", "Protokoll aller Änderungen"],
     ["Wäschetypen", "Typen für Kissen &amp; Bettdecken"],
-    ["Raumbuchung", "Buchbare Räume, Arbeitsplätze und Stellvertretungen"],
     ["Update", "Versionsprüfung und Update über GitHub (Kapitel 3)"],
 ], [45 * mm, 125 * mm]))
 story += [P("Mitarbeiter, Rollen und Teams stehen unter <b>Benutzer &amp; Rollen</b>, die Gebäudestruktur unter <b>Raumbuch</b>. "
             "Beim Anlegen eines Mitarbeiters erzeugt der Würfel-Knopf ein gut lesbares Zufallspasswort.", body)]
 
-# ── 24. Berichte ─────────────────────────────────────────────────────────────
+# ── 23. Berichte ─────────────────────────────────────────────────────────────
 chapter("Berichte")
 story.append(tbl([
     ["Bericht", "Inhalt", "Export"],
@@ -593,9 +573,9 @@ story.append(tbl([
     ["Bettenstamm", "Betten nach Prüfstatus bzw. gesperrt", "CSV"],
 ], [38 * mm, 98 * mm, 34 * mm]))
 
-# ── 25. Sicherheit ───────────────────────────────────────────────────────────
+# ── 24. Sicherheit ───────────────────────────────────────────────────────────
 chapter("Sicherheit & Datensicherung", new_page=True)
-story += [P("25.1 Schutzmaßnahmen", h2)]
+story += [P("24.1 Schutzmaßnahmen", h2)]
 story.append(tbl([
     ["Maßnahme", "Beschreibung"],
     ["Passwörter", "bcrypt mit Cost-Factor 12"],
@@ -609,7 +589,7 @@ story.append(tbl([
     ["Updates", "Nur von GitHub, mit SHA256-Prüfung"],
     ["Audit-Log", "Änderungen werden protokolliert (ohne Passwörter)"],
 ], [36 * mm, 134 * mm]))
-story += [P("25.2 Datensicherung", h2)]
+story += [P("24.2 Datensicherung", h2)]
 story.append(tbl([
     ["Was", "Wie"],
     ["Täglich automatisch", "Verwaltung → Backup: Zielpfad (lokal oder \\\\server\\freigabe), Uhrzeit, ggf. Anmeldedaten; „Jetzt sichern“ zum Testen"],
@@ -620,7 +600,7 @@ story.append(tbl([
 story += [P("Alvea spricht im internen Netz HTTP. Für die Kamera auf iPad/iPhone (Barcode-Scanner) ist HTTPS nötig – dafür einen "
             "Reverse-Proxy mit Zertifikat vorschalten. Ohne HTTPS weicht Alvea auf die Kamera-App des Geräts aus.", note)]
 
-# ── 26. Konfiguration ────────────────────────────────────────────────────────
+# ── 25. Konfiguration ────────────────────────────────────────────────────────
 chapter("Konfiguration")
 story += [P("Datei <b>data\\alvea.env</b> (Startmenü → Konfiguration bearbeiten). Änderungen werden nach einem Neustart des Dienstes wirksam.", body), SP(2)]
 story.append(tbl([
@@ -636,7 +616,7 @@ story.append(tbl([
     ["UPDATE_REPO", "phillhf/alvea", "GitHub-Repository für Updates"],
 ], [44 * mm, 30 * mm, 96 * mm]))
 
-# ── 27. FAQ ──────────────────────────────────────────────────────────────────
+# ── 26. FAQ ──────────────────────────────────────────────────────────────────
 chapter("Häufige Fragen", new_page=True)
 story.append(tbl([
     ["Problem", "Lösung"],
@@ -651,7 +631,7 @@ story.append(tbl([
     ["Barcode nicht in der Auswahl", "Bett im Bettenstamm anlegen bzw. Flasche per Wareneingang scannen"],
     ["O2-Scan: ungültige Aktion", "Falscher Scan-Modus – die Flasche hat einen anderen Status"],
     ["Backup schlägt fehl", "Zielpfad und Anmeldedaten unter Verwaltung → Backup prüfen"],
-    ["Kamera auf dem iPad geht nicht", "HTTPS fehlt – siehe Kapitel 25"],
+    ["Kamera auf dem iPad geht nicht", "HTTPS fehlt – siehe Kapitel 24"],
 ], [58 * mm, 112 * mm]))
 
 assert chapter_no == len(CHAPTERS), "Inhaltsverzeichnis und Kapitel stimmen nicht überein"

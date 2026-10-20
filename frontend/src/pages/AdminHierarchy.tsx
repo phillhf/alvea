@@ -13,12 +13,11 @@ const O2Tab                = lazy(() => import("./admin/O2Tab"));
 const RuecksendungAbschluesseTab = lazy(() => import("./admin/RuecksendungAbschluesseTab"));
 const AuditLogTab                = lazy(() => import("./admin/AuditLogTab"));
 const WaescheTypenTab            = lazy(() => import("./admin/WaescheTypenTab"));
-const SharedRoomsTab             = lazy(() => import("./admin/SharedRoomsTab"));
 const UpdateTab                  = lazy(() => import("./admin/UpdateTab"));
 
 type Tab = "bedtypes" | "pathogens" | "aufbereitungsarten" | "berufsgruppen"
          | "instructions" | "settings" | "design" | "modules" | "backup"
-         | "o2" | "ruecksendung_abschluesse" | "audit_log" | "waesche_typen" | "shared_rooms" | "update";
+         | "o2" | "ruecksendung_abschluesse" | "audit_log" | "waesche_typen" | "update";
 
 const LABEL: Record<Tab, string> = {
   bedtypes:                "Bett-Typen",
@@ -34,14 +33,13 @@ const LABEL: Record<Tab, string> = {
   ruecksendung_abschluesse:"📦 Rücks.-Gründe",
   audit_log:               "🔍 Audit-Log",
   waesche_typen:           "🛏 Wäschetypen",
-  shared_rooms:            "🪑 Raumbuchung",
   update:                  "⬆️ Update",
 };
 
 const ALL_TABS: Tab[] = [
   "bedtypes","pathogens","aufbereitungsarten","berufsgruppen",
   "instructions","settings","design","modules","backup","o2",
-  "ruecksendung_abschluesse","audit_log","waesche_typen","shared_rooms","update",
+  "ruecksendung_abschluesse","audit_log","waesche_typen","update",
 ];
 
 function TabLoader() {
@@ -84,7 +82,6 @@ export default function AdminHierarchy() {
         {tab === "ruecksendung_abschluesse" && <RuecksendungAbschluesseTab />}
         {tab === "audit_log"                && <AuditLogTab />}
         {tab === "waesche_typen"            && <WaescheTypenTab />}
-        {tab === "shared_rooms"             && <SharedRoomsTab />}
         {tab === "update"                   && <UpdateTab />}
       </Suspense>
     </div>

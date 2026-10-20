@@ -20,9 +20,6 @@ export type Permission =
   | "spindverwaltung"
   | "waesche"
   | "chat"
-  | "raumbuchung"
-  | "raumbuchung_stellvertretung"
-  | "raumbuchungsadmin"
   | "verwaltung";
 
 export interface User {

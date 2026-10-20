@@ -480,7 +480,7 @@ const MIGRATIONS: Migration[] = [
         "bettenaufbereitung","bettenaufbereitung_zentral","zimmerreinigung","berichte",
         "auftraege_erstellen","dashboard","sauerstofftransport","lager","betten_reparatur",
         "stationspersonal","bettenstamm","betten_pw","meldungen","raumbuch",
-        "benutzerverwaltung","spindverwaltung","waesche","chat","raumbuchung","raumbuchung_stellvertretung","raumbuchungsadmin","verwaltung"
+        "benutzerverwaltung","spindverwaltung","waesche","chat","verwaltung"
       ];
       const roleId = crypto.randomUUID();
       const userId = crypto.randomUUID();
@@ -497,7 +497,7 @@ const MIGRATIONS: Migration[] = [
         "bettenaufbereitung","bettenaufbereitung_zentral","zimmerreinigung","berichte",
         "auftraege_erstellen","dashboard","sauerstofftransport","lager","betten_reparatur",
         "stationspersonal","bettenstamm","betten_pw","meldungen","raumbuch",
-        "benutzerverwaltung","spindverwaltung","waesche","chat","raumbuchung","raumbuchung_stellvertretung","raumbuchungsadmin","verwaltung"
+        "benutzerverwaltung","spindverwaltung","waesche","chat","verwaltung"
       ];
       db.prepare(`UPDATE roles SET permissions=? WHERE name='Administrator'`).run(JSON.stringify(allPerms));
     }
@@ -1123,81 +1123,31 @@ const MIGRATIONS: Migration[] = [
   }},
 
 
-  { version: 41, name: "shared_rooms_bookings", up: () => {
-    db.exec(`CREATE TABLE IF NOT EXISTS shared_rooms (
-      id            TEXT PRIMARY KEY,
-      name          TEXT NOT NULL,
-      location      TEXT,
-      teilbar       INTEGER NOT NULL DEFAULT 1,
-      raum_buchbar  INTEGER NOT NULL DEFAULT 0,
-      notiz         TEXT,
-      created_at    TEXT NOT NULL DEFAULT (datetime('now'))
-    )`);
-    db.exec(`CREATE TABLE IF NOT EXISTS shared_desks (
-      id            TEXT PRIMARY KEY,
-      room_id       TEXT NOT NULL REFERENCES shared_rooms(id) ON DELETE CASCADE,
-      name          TEXT NOT NULL,
-      sort_order    INTEGER NOT NULL DEFAULT 0,
-      created_at    TEXT NOT NULL DEFAULT (datetime('now'))
-    )`);
-    db.exec(`CREATE TABLE IF NOT EXISTS shared_bookings (
-      id            TEXT PRIMARY KEY,
-      room_id       TEXT NOT NULL REFERENCES shared_rooms(id) ON DELETE CASCADE,
-      desk_id       TEXT REFERENCES shared_desks(id) ON DELETE CASCADE,
-      whole_room    INTEGER NOT NULL DEFAULT 0,
-      user_id       TEXT NOT NULL,
-      user_name     TEXT,
-      start_at      TEXT NOT NULL,
-      end_at        TEXT NOT NULL,
-      created_at    TEXT NOT NULL DEFAULT (datetime('now'))
-    )`);
-    safeIndex("idx_shared_desks_room",     "shared_desks",    "room_id");
-    safeIndex("idx_shared_bookings_room",  "shared_bookings", "room_id");
-    safeIndex("idx_shared_bookings_desk",  "shared_bookings", "desk_id");
-    safeIndex("idx_shared_bookings_user",  "shared_bookings", "user_id");
-    safeIndex("idx_shared_bookings_start", "shared_bookings", "start_at");
-    db.exec(`INSERT OR IGNORE INTO modules (key,name,description,icon,active,sort_order)
-             VALUES ('raumbuchung','Raumbuchung','Gemeinsam genutzte Räume und Tische buchen','🪑',0,11)`);
-  }},
+  // ── v41–v45: ehemaliges Modul "Raumbuchung" ───────────────────────────────
+  // Das Modul wurde in 1.1.0 entfernt. Die Versionen bleiben als leere Platzhalter
+  // stehen, damit die Nummerierung bestehender Datenbanken konsistent bleibt.
+  { version: 41, name: "shared_rooms_bookings",           up: () => {} },
+  { version: 42, name: "shared_bookings_stellvertretung", up: () => {} },
+  { version: 43, name: "shared_booking_delegates",        up: () => {} },
+  { version: 44, name: "shared_desks_ausstattung",        up: () => {} },
+  { version: 45, name: "shared_desk_favorites",           up: () => {} },
 
-
-  { version: 42, name: "shared_bookings_stellvertretung", up: () => {
-    // Erfasst wer die Buchung tatsächlich angelegt hat, falls stellvertretend
-    // für eine andere Person gebucht wurde (z. B. Sekretariat für Chefarzt).
-    col("shared_bookings", "booked_by_id",   "TEXT");
-    col("shared_bookings", "booked_by_name", "TEXT");
-  }},
-
-
-  { version: 43, name: "shared_booking_delegates", up: () => {
-    // Explizite Stellvertretungs-Zuordnung: wer (delegate) darf fuer wen
-    // (represented) buchen. Ersetzt die pauschale "fuer jeden buchen"-Logik.
-    db.exec(`CREATE TABLE IF NOT EXISTS shared_booking_delegates (
-      id               TEXT PRIMARY KEY,
-      delegate_id      TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-      represented_id   TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-      created_at       TEXT NOT NULL DEFAULT (datetime('now')),
-      UNIQUE(delegate_id, represented_id)
-    )`);
-    safeIndex("idx_shared_delegates_delegate",    "shared_booking_delegates", "delegate_id");
-    safeIndex("idx_shared_delegates_represented", "shared_booking_delegates", "represented_id");
-  }},
-
-
-  { version: 44, name: "shared_desks_ausstattung", up: () => {
-    col("shared_desks", "ausstattung", "TEXT");
-  }},
-
-
-  { version: 45, name: "shared_desk_favorites", up: () => {
-    db.exec(`CREATE TABLE IF NOT EXISTS shared_desk_favorites (
-      id         TEXT PRIMARY KEY,
-      user_id    TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-      desk_id    TEXT NOT NULL REFERENCES shared_desks(id) ON DELETE CASCADE,
-      created_at TEXT NOT NULL DEFAULT (datetime('now')),
-      UNIQUE(user_id, desk_id)
-    )`);
-    safeIndex("idx_shared_favorites_user", "shared_desk_favorites", "user_id");
+  // ── v46: Raumbuchung entfernen (Tabellen, Modul, Berechtigungen) ──────────
+  { version: 46, name: "raumbuchung_entfernt", up: () => {
+    for (const t of ["shared_desk_favorites", "shared_booking_delegates", "shared_bookings", "shared_desks", "shared_rooms"]) {
+      db.exec(`DROP TABLE IF EXISTS ${t}`);
+    }
+    db.exec(`DELETE FROM modules WHERE key='raumbuchung'`);
+    const removed = new Set(["raumbuchung", "raumbuchung_stellvertretung", "raumbuchungsadmin"]);
+    const roles = db.prepare(`SELECT id, permissions FROM roles`).all() as { id: string; permissions: string }[];
+    const upd = db.prepare(`UPDATE roles SET permissions=? WHERE id=?`);
+    for (const r of roles) {
+      let perms: string[];
+      try { perms = JSON.parse(r.permissions || "[]"); } catch { continue; }
+      if (!Array.isArray(perms)) continue;
+      const kept = perms.filter(x => !removed.has(x));
+      if (kept.length !== perms.length) upd.run(JSON.stringify(kept), r.id);
+    }
   }},
 
 
@@ -1352,7 +1302,7 @@ export function ensureWaesche(): void {
       "bettenaufbereitung","bettenaufbereitung_zentral","zimmerreinigung","berichte",
       "auftraege_erstellen","dashboard","sauerstofftransport","lager","betten_reparatur",
       "stationspersonal","bettenstamm","betten_pw","meldungen","raumbuch",
-      "benutzerverwaltung","spindverwaltung","waesche","chat","raumbuchung","raumbuchung_stellvertretung","raumbuchungsadmin","verwaltung"
+      "benutzerverwaltung","spindverwaltung","waesche","chat","verwaltung"
     ]);
     const adminRole = db.prepare(`SELECT id FROM roles WHERE name='Administrator' LIMIT 1`).get() as any;
     if (adminRole) {

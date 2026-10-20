@@ -65,8 +65,6 @@ export default function Layout() {
       ? [{ to: "/raumbuch",       label: "Raumbuch",           icon: "🗺️", end: false }] : []),
     ...(can("verwaltung") || can("lager")
       ? [{ to: "/ruecksendungen", label: "Rücksendungen",      icon: "📦", end: false }] : []),
-    ...((can("raumbuchung") || can("raumbuchungsadmin") || can("verwaltung")) && (modulesLoading || isActive("raumbuchung"))
-      ? [{ to: "/raumbuchung",    label: "Raumbuchung",        icon: "🪑", end: false }] : []),
     ...(can("benutzerverwaltung") || can("verwaltung")
       ? [{ to: "/benutzer-rollen",label: "Benutzer & Rollen",  icon: "👥", end: false }] : []),
     ...(can("verwaltung")

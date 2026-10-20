@@ -5,7 +5,7 @@
 <h1 align="center">Alvea</h1>
 
 <p align="center">
-  Digitale Krankenhaus-Logistik: Bettenaufbereitung, Zimmerreinigung, Sauerstoff, Rücksendungen, Wäsche, Spinde und Raumbuchung – in einer Web-App für PC, iPad und Smartphone.
+  Digitale Krankenhaus-Logistik: Bettenaufbereitung, Zimmerreinigung, Sauerstoff, Rücksendungen, Wäsche und Spinde – in einer Web-App für PC, iPad und Smartphone.
 </p>
 
 <p align="center">
@@ -47,13 +47,12 @@ Alle Module lassen sich unter **Verwaltung → 🧩 Module** einzeln ein- und au
 | 📦 **Rücksendungen** | Station meldet → Lager → Einkauf → Abschluss, Begleitschein als PDF, Anhänge, Auswertung |
 | 🛏 **Kissen & Bettdecken** | Wäsche-Anfragen der Stationen |
 | 🔐 **Spindverwaltung** | Spinde, Anfragen, Vergabe und Historie |
-| 🪑 **Raumbuchung** | Gemeinsam genutzte Räume und Arbeitsplätze buchen, Stellvertretungen, Favoriten, Agenda |
 | 📢 **Meldungen** | Ankündigungen mit Gültigkeitszeitraum und Archiv |
 | 💬 **Stations-Chat** | Gemeinsamer Chat für alle Stationen |
 | 📊 **Berichte** | Stationsbericht, Bett-Reisehistorie, Zentral-Tagesbericht, Rücksendungen – jeweils als PDF |
 | 🗺️ **Raumbuch** | Haus → Gebäude → Station/Bereich → Raum → Stellplatz, inkl. Excel-Import |
 
-Außerdem: Rollen mit 22 Einzelberechtigungen und Bereichs-Scope, Barcode-Scanner per Kamera, Design-Anpassung (Farben, Schriften, Hintergrund), automatische Backups auf Netzlaufwerk, Audit-Log, Offline-Anzeige (PWA).
+Außerdem: Rollen mit 19 Einzelberechtigungen und Bereichs-Scope, Barcode-Scanner per Kamera, Design-Anpassung (Farben, Schriften, Hintergrund), automatische Backups auf Netzlaufwerk, Audit-Log, Offline-Anzeige (PWA).
 
 Ausführliche Anleitung für Anwender und Administratoren: **[Benutzer- und Installationshandbuch (PDF)](docs/Alvea_Benutzerhandbuch.pdf)**.
 
@@ -174,9 +173,6 @@ Rollen werden frei unter *Benutzer & Rollen* konfiguriert. Jede Rolle erhält ei
 | `lager` | Lager (Rücksendungen, O₂-Lager) |
 | `waesche` | Kissen & Bettdecken |
 | `spindverwaltung` | Spindverwaltung |
-| `raumbuchung` | Räume/Arbeitsplätze buchen |
-| `raumbuchung_stellvertretung` | Für andere buchen (laut Stellvertretungs-Zuordnung) |
-| `raumbuchungsadmin` | Räume und Arbeitsplätze verwalten |
 | `meldungen` | Meldungen erstellen und bearbeiten |
 | `chat` | Stations-Chat |
 | `raumbuch` | Raumbuch bearbeiten |
