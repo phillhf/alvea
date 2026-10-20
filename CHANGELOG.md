@@ -10,7 +10,7 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/), Ver
 - Berechtigungen `raumbuchung`, `raumbuchung_stellvertretung` und `raumbuchungsadmin` entfernt (jetzt 19 Berechtigungen).
 
 ### Hinweis zum Update
-- Die Datenbank-Migration v46 löscht beim Update die Raumbuchungs-Tabellen samt aller Buchungen, entfernt das Modul und streicht die drei Berechtigungen aus allen Rollen. Die Datenbank wird vor dem Update automatisch gesichert (`dataackups\`).
+- Die Datenbank-Migration v46 löscht beim Update die Raumbuchungs-Tabellen samt aller Buchungen, entfernt das Modul und streicht die drei Berechtigungen aus allen Rollen. Die Datenbank wird vor dem Update automatisch gesichert (Ordner `data\backups`).
 - Das **Raumbuch** (Häuser, Gebäude, Stationen, Räume, Stellplätze) ist davon nicht betroffen.
 
 ---
