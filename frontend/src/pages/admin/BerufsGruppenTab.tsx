@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { api } from "../../api/client";
 import { useToast } from "../../contexts/ToastContext";
+import { confirmDialog } from "../../components/Dialog";
 
 interface BG { id: string; name: string; sort_order: number; active: number; }
 
@@ -41,7 +42,7 @@ export default function BerufsGruppenTab() {
   }
 
   async function remove(bg: BG) {
-    if (!confirm(`"${bg.name}" wirklich löschen?`)) return;
+    if (!(await confirmDialog(`"${bg.name}" wirklich löschen?`, { danger: true }))) return;
     await api.delete(`/berufsgruppen/${bg.id}`);
     toast.success("Gelöscht");
     load();

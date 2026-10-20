@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { api } from "../api/client";
+import { alertDialog } from "../components/Dialog";
 
 interface Room { id: string; room_number: string }
 
@@ -32,7 +33,7 @@ export default function NewRoomTask() {
     e.preventDefault();
     if (!roomId) return;
     if (!freiChecked) {
-      alert("Bitte bestätigen Sie dass das Zimmer frei von persönlichen Gegenständen ist.");
+      alertDialog("Bitte bestätigen Sie dass das Zimmer frei von persönlichen Gegenständen ist.");
       return;
     }
     setSaving(true);
@@ -51,7 +52,7 @@ export default function NewRoomTask() {
       });
       nav(`/rooms/stations/${stationId}`);
     } catch (e: any) {
-      alert(e.response?.data?.error || "Fehler");
+      alertDialog(e.response?.data?.error || "Fehler");
     } finally { setSaving(false); }
   }
 

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { api } from "../../api/client";
 import { RowActions, EditModal } from "./shared";
+import { confirmDialog } from "../../components/Dialog";
 
 interface RoomType { id: string; name: string; icon: string; sort_order: number; }
 
@@ -27,7 +28,7 @@ export default function RoomTypesTab() {
   }
 
   async function remove(id: string, name: string) {
-    if (!confirm(`Raumart „${name}" löschen? Räume mit diesem Typ werden auf keinen Typ zurückgesetzt.`)) return;
+    if (!(await confirmDialog(`Raumart „${name}" löschen? Räume mit diesem Typ werden auf keinen Typ zurückgesetzt.`, { danger: true }))) return;
     await api.delete(`/room-types/${id}`);
     refresh();
   }

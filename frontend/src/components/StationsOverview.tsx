@@ -5,6 +5,7 @@ import { api } from "../api/client";
 import { useAuth } from "../contexts/AuthContext";
 import { useLastUpdated } from "../hooks/useLastUpdated";
 import { LiveIndicator } from "./LiveIndicator";
+import { confirmDialog } from "./Dialog";
 
 interface Area { id: string; name: string; house_name?: string }
 interface Station {
@@ -70,7 +71,7 @@ export default function StationsOverview({
   }
 
   async function leave(stationId: string) {
-    if (!confirm("Station verlassen? Alle nicht gestarteten Aufträge werden freigegeben.")) return;
+    if (!(await confirmDialog("Station verlassen? Alle nicht gestarteten Aufträge werden freigegeben.", { danger: true }))) return;
     setBusy(stationId);
     try { await api.post(`/stations/${stationId}/leave`); await refresh(); }
     finally { setBusy(null); }
@@ -78,7 +79,11 @@ export default function StationsOverview({
 
   async function arrived(stationId: string) {
     setBusy(stationId);
-    try { await api.post(`/stations/${stationId}/arrived`); await refresh(); }
+    try {
+      await api.post(`/stations/${stationId}/arrived`);
+      // Direkt in die Station – spart den Klick auf "Station öffnen"
+      nav(`${stationLinkPrefix}/${stationId}`);
+    }
     finally { setBusy(null); }
   }
 

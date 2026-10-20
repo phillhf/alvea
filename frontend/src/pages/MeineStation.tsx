@@ -2,6 +2,7 @@ import { useToast } from "../contexts/ToastContext";
 import { useEffect, useRef, useState } from "react";
 import { api } from "../api/client";
 import { useAuth } from "../contexts/AuthContext";
+import { useModules } from "../contexts/ModulesContext";
 import { useLastUpdated } from "../hooks/useLastUpdated";
 import { LiveIndicator } from "../components/LiveIndicator";
 import { BarcodeScanner } from "../components/BarcodeScanner";
@@ -33,6 +34,43 @@ function timeAgo(iso: string): string {
   return `${Math.round(diff / 1440)} T.`;
 }
 
+/* ─── Hilfen ─────────────────────────────────────────── */
+/** "Station 1A" statt "Station 1A (Station 1A)" – Bereich nur anzeigen, wenn er sich unterscheidet */
+function stationLabel(s: Station): string {
+  return s.area_name && s.area_name !== s.name ? `${s.name} (${s.area_name})` : s.name;
+}
+
+function StationSelect({ stations, value, onChange }: { stations: Station[]; value: string; onChange: (id: string) => void }) {
+  // Bei nur einer Station keine Auswahl anzeigen – sie ist vorausgewählt
+  if (stations.length === 1) return null;
+  return (
+    <div className="space-y-1">
+      <label className="label">Station *</label>
+      <select className="input w-full" value={value} onChange={e => onChange(e.target.value)}>
+        <option value="">— Station auswählen —</option>
+        {stations.map(s => <option key={s.id} value={s.id}>{stationLabel(s)}</option>)}
+      </select>
+    </div>
+  );
+}
+
+/** Zimmer + Betten einer Station laden (für Bett-Kacheln und Zimmerauswahl) */
+function useStationRooms(stationId: string) {
+  const [rooms, setRooms] = useState<Room[]>([]);
+  const [loading, setLoading] = useState(false);
+  useEffect(() => {
+    if (!stationId) { setRooms([]); return; }
+    setLoading(true);
+    api.get<Room[]>(`/defects/stations/${stationId}/beds`)
+      .then(r => setRooms(r.data))
+      .catch(() => setRooms([]))
+      .finally(() => setLoading(false));
+  }, [stationId]);
+  return { rooms, loading };
+}
+
+const bedIsBusy = (b: Bed) => !!b.status && b.status !== "abgeschlossen" && b.status !== "frei";
+
 /* ─── Defekt-Modal ───────────────────────────────────── */
 interface DefectModalProps { stations: Station[]; onClose: () => void; }
 function DefectModal({ stations, onClose }: DefectModalProps) {
@@ -40,14 +78,17 @@ function DefectModal({ stations, onClose }: DefectModalProps) {
   const [barcodes, setBarcodes]       = useState<Barcode[]>([]);
   const [suggestions, setSuggestions] = useState<Barcode[]>([]);
   const [showSug, setShowSug]         = useState(false);
-  const [stationId, setStationId]     = useState("");
+  const [stationId, setStationId]     = useState(stations.length === 1 ? stations[0].id : "");
+  const [roomId, setRoomId]           = useState("");
   const [barcode, setBarcode]         = useState("");
   const [location, setLocation]       = useState("");
   const [description, setDescription] = useState("");
   const [scanning, setScanning]       = useState(false);
   const [saving, setSaving]           = useState(false);
+  const { rooms } = useStationRooms(stationId);
 
   useEffect(() => { api.get<Barcode[]>("/barcodes").then(r => setBarcodes(r.data)); }, []);
+  useEffect(() => { setRoomId(""); }, [stationId]);
 
   function onBarcodeInput(val: string) {
     setBarcode(val);
@@ -59,16 +100,18 @@ function DefectModal({ stations, onClose }: DefectModalProps) {
   }
 
   async function submit() {
-    if (!stationId || !location.trim() || !description.trim()) return;
+    if (!stationId || !description.trim()) return;
     setSaving(true);
     try {
-      const stationName = stations.find(s => s.id === stationId)?.name ?? "";
       await api.post("/defects", {
         scanned_barcode: barcode.trim() || undefined,
         title:           description.trim(),
-        notes:           `Station: ${stationName} | Standort: ${location.trim()}`,
+        station_id:      stationId,
+        room_id:         roomId || undefined,
+        notes:           location.trim() ? `Standort: ${location.trim()}` : undefined,
         severity:        "medium",
       });
+      toast.success("Defekt gemeldet");
       onClose();
     } catch (e: any) {
       toast.error(e.response?.data?.error || "Fehler beim Speichern");
@@ -78,18 +121,26 @@ function DefectModal({ stations, onClose }: DefectModalProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40"
       onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
-      <div className="bg-white rounded-lg shadow-md border border-[#E8E8E8] w-full max-w-md space-y-4 p-5">
+      <div className="bg-white rounded-lg shadow-md border border-[#E8E8E8] w-full max-w-md space-y-4 p-5 max-h-[90vh] overflow-y-auto">
         <div className="flex items-start justify-between gap-2">
           <h2 className="font-display text-xl font-bold">🔧 Defektes Bett melden</h2>
           <button onClick={onClose} className="text-slate-400 hover:text-slate-600 text-2xl leading-none">×</button>
         </div>
+        <StationSelect stations={stations} value={stationId} onChange={setStationId} />
         <div className="space-y-1">
-          <label className="label">Station *</label>
-          <select className="input" value={stationId} onChange={e => setStationId(e.target.value)}>
-            <option value="">— Station auswählen —</option>
-            {stations.map(s => <option key={s.id} value={s.id}>{s.name} ({s.area_name})</option>)}
-          </select>
+          <label className="label">Was ist defekt? *</label>
+          <input className="input" placeholder="z. B. Seitengitter defekt, Bremse blockiert"
+            value={description} onChange={e => setDescription(e.target.value)} />
         </div>
+        {stationId && rooms.length > 0 && (
+          <div className="space-y-1">
+            <label className="label">Zimmer <span className="text-slate-400 font-normal">(optional)</span></label>
+            <select className="input w-full" value={roomId} onChange={e => setRoomId(e.target.value)}>
+              <option value="">— kein bestimmtes Zimmer —</option>
+              {rooms.map(r => <option key={r.id} value={r.id}>Zimmer {r.room_number}</option>)}
+            </select>
+          </div>
+        )}
         <div className="space-y-1">
           <label className="label">Bett-Nummer / Barcode <span className="text-slate-400 font-normal">(optional)</span></label>
           <div className="flex gap-2">
@@ -100,7 +151,7 @@ function DefectModal({ stations, onClose }: DefectModalProps) {
                 onFocus={() => barcode.length >= 1 && setShowSug(true)}
                 onBlur={() => setTimeout(() => setShowSug(false), 150)} />
               {showSug && suggestions.length > 0 && (
-                <div className="absolute z-10 top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-md shadow-md border border-[#E8E8E8] overflow-hidden">
+                <div className="absolute z-10 top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-md shadow-md overflow-hidden">
                   {suggestions.map(b => (
                     <button key={b.code} type="button"
                       className="w-full text-left px-4 py-2.5 hover:bg-slate-50 border-b border-slate-100 last:border-0"
@@ -116,17 +167,12 @@ function DefectModal({ stations, onClose }: DefectModalProps) {
           </div>
         </div>
         <div className="space-y-1">
-          <label className="label">Wo steht das Bett? *</label>
-          <input className="input" placeholder="z. B. Zimmer 12, Flur, Lager"
+          <label className="label">Genauer Standort <span className="text-slate-400 font-normal">(optional)</span></label>
+          <input className="input" placeholder="z. B. Flur, Lager, vor Zimmer 12"
             value={location} onChange={e => setLocation(e.target.value)} />
         </div>
-        <div className="space-y-1">
-          <label className="label">Was ist defekt? *</label>
-          <input className="input" placeholder="z. B. Seitengitter defekt, Bremse blockiert"
-            value={description} onChange={e => setDescription(e.target.value)} />
-        </div>
         <div className="flex gap-3 pt-1">
-          <button onClick={submit} disabled={saving || !stationId || !location.trim() || !description.trim()}
+          <button onClick={submit} disabled={saving || !stationId || !description.trim()}
             className="btn-primary flex-1">
             {saving ? "Wird gesendet…" : "Defekt melden"}
           </button>
@@ -142,31 +188,21 @@ function DefectModal({ stations, onClose }: DefectModalProps) {
 interface ReinigungModalProps { stations: Station[]; onClose: () => void; onSaved: () => void; }
 function ReinigungModal({ stations, onClose, onSaved }: ReinigungModalProps) {
   const toast = useToast();
-  const [stationId, setStationId]     = useState("");
-  const [rooms, setRooms]             = useState<Room[]>([]);
-  const [roomId, setRoomId]           = useState("");
+  const [stationId, setStationId]     = useState(stations.length === 1 ? stations[0].id : "");
   const [bedId, setBedId]             = useState("");
   const [cleaningType, setCleaningType] = useState<"normal" | "infektioes">("normal");
   const [pathogens, setPathogens]     = useState<Pathogen[]>([]);
   const [pathogenId, setPathogenId]   = useState("");
   const [saving, setSaving]           = useState(false);
+  const { rooms, loading } = useStationRooms(stationId);
 
-  useEffect(() => {
-    if (stationId) {
-      api.get<Room[]>(`/defects/stations/${stationId}/beds`).then(r => {
-        setRooms(r.data); setRoomId(""); setBedId("");
-      });
-    }
-  }, [stationId]);
-
+  useEffect(() => { setBedId(""); }, [stationId]);
   useEffect(() => {
     api.get<Pathogen[]>("/pathogens").then(r => setPathogens(r.data));
   }, []);
 
-  const bedsInRoom = rooms.find(r => r.id === roomId)?.beds ?? [];
-
   async function submit() {
-    if (!stationId || !roomId || !bedId) return;
+    if (!bedId) return;
     setSaving(true);
     try {
       await api.post("/tasks", {
@@ -189,49 +225,47 @@ function ReinigungModal({ stations, onClose, onSaved }: ReinigungModalProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40"
       onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
-      <div className="bg-white rounded-lg shadow-md border border-[#E8E8E8] w-full max-w-md space-y-4 p-5">
+      <div className="bg-white rounded-lg shadow-md border border-[#E8E8E8] w-full max-w-md space-y-4 p-5 max-h-[90vh] overflow-y-auto">
         <div className="flex items-start justify-between gap-2">
           <h2 className="font-display text-xl font-bold">🛏 Bettenreinigung anfordern</h2>
           <button onClick={onClose} className="text-slate-400 hover:text-slate-600 text-2xl leading-none">×</button>
         </div>
 
-        {/* Station */}
-        <div className="space-y-1">
-          <label className="label">Station *</label>
-          <select className="input" value={stationId} onChange={e => setStationId(e.target.value)}>
-            <option value="">— Station auswählen —</option>
-            {stations.map(s => <option key={s.id} value={s.id}>{s.name} ({s.area_name})</option>)}
-          </select>
-        </div>
+        <StationSelect stations={stations} value={stationId} onChange={setStationId} />
 
-        {/* Zimmer */}
+        {/* Bett direkt antippen (statt Zimmer- und Stellplatz-Auswahlliste) */}
         {stationId && (
-          <div className="space-y-1">
-            <label className="label">Raum *</label>
-            <select className="input" value={roomId} onChange={e => { setRoomId(e.target.value); setBedId(""); }}>
-              <option value="">— Zimmer auswählen —</option>
-              {rooms.map(r => <option key={r.id} value={r.id}>Zimmer {r.room_number}</option>)}
-            </select>
-          </div>
-        )}
-
-        {/* Bett */}
-        {roomId && (
-          <div className="space-y-1">
-            <label className="label">Stellplatz *</label>
-            <select className="input" value={bedId} onChange={e => setBedId(e.target.value)}>
-              <option value="">— Stellplatz auswählen —</option>
-              {bedsInRoom.map(b => {
-                const hasActive = b.status && b.status !== "abgeschlossen" && b.status !== "frei";
-                return (
-                  <option key={b.id} value={b.id} disabled={!!hasActive}>
-                    Bett {b.bed_number}{b.bed_type_name ? ` (${b.bed_type_name})` : ""}{b.barcode ? ` · ${b.barcode}` : ""}{hasActive ? " – bereits in Bearbeitung" : ""}
-                  </option>
-                );
-              })}
-            </select>
-            {bedsInRoom.every(b => b.status && b.status !== "abgeschlossen" && b.status !== "frei") && (
-              <p className="text-xs text-amber-600">⚠️ Alle Stellplätze in diesem Zimmer haben bereits einen aktiven Auftrag.</p>
+          <div className="space-y-2">
+            <label className="label">Bett antippen *</label>
+            {loading ? (
+              <p className="text-sm text-slate-400">Wird geladen…</p>
+            ) : rooms.length === 0 ? (
+              <p className="text-sm text-slate-400">Für diese Station sind keine Zimmer angelegt.</p>
+            ) : (
+              <div className="space-y-1.5 max-h-72 overflow-y-auto pr-1">
+                {rooms.map(r => (
+                  <div key={r.id} className="flex items-center gap-2">
+                    <span className="text-xs font-medium text-slate-500 w-20 shrink-0">Zi. {r.room_number}</span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {r.beds.map(b => {
+                        const busy = bedIsBusy(b);
+                        const selected = bedId === b.id;
+                        return (
+                          <button key={b.id} type="button" disabled={busy}
+                            title={busy ? "Bereits in Bearbeitung" : b.bed_type_name ?? undefined}
+                            onClick={() => setBedId(b.id)}
+                            className={`min-w-[3rem] px-3 py-2 rounded-lg border-2 text-sm font-medium transition-all ${
+                              selected ? "border-[color:var(--brand-600)] bg-[color:var(--brand-50)] text-[color:var(--brand-700)]"
+                              : busy ? "border-slate-100 bg-slate-50 text-slate-300 cursor-not-allowed"
+                              : "border-slate-200 hover:border-slate-300"}`}>
+                            {b.bed_number}{busy ? " ⏳" : ""}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
             )}
           </div>
         )}
@@ -270,7 +304,7 @@ function ReinigungModal({ stations, onClose, onSaved }: ReinigungModalProps) {
         )}
 
         <div className="flex gap-3 pt-1">
-          <button onClick={submit} disabled={saving || !stationId || !roomId || !bedId}
+          <button onClick={submit} disabled={saving || !bedId}
             className="btn-primary flex-1">
             {saving ? "Wird gespeichert…" : "Reinigung anfordern"}
           </button>
@@ -298,9 +332,12 @@ function ScheuernWischModal({ stations, onClose, onSaved }: ZimmerModalProps) {
   const [saving, setSaving]             = useState(false);
 
   useEffect(() => {
-    api.get<Aufbereitungsart[]>("/aufbereitungsarten").then(r =>
-      setAufbereitungsarten(r.data.filter((a: any) => a.active))
-    );
+    api.get<Aufbereitungsart[]>("/aufbereitungsarten").then(r => {
+      const aktiv = r.data.filter((a: any) => a.active);
+      setAufbereitungsarten(aktiv);
+      // Nur eine Maßnahme vorhanden → direkt vorauswählen
+      if (aktiv.length === 1) setAufbereitungsartId(aktiv[0].id);
+    });
     api.get<{ key: string; value: string }[]>("/settings").then(r => {
       const s = r.data.find((x: any) => x.key === "sw_freitext");
       if (s?.value) setFreitext(s.value);
@@ -316,9 +353,11 @@ function ScheuernWischModal({ stations, onClose, onSaved }: ZimmerModalProps) {
   }, [stationId]);
 
   const selectedArt = aufbereitungsarten.find(a => a.id === aufbereitungsartId);
+  // Ohne angelegte Desinfektionsmaßnahmen darf das Anfordern nicht blockiert sein
+  const artPflicht = aufbereitungsarten.length > 0;
 
   async function submit() {
-    if (!stationId || !roomId || !aufbereitungsartId) return;
+    if (!stationId || !roomId || (artPflicht && !aufbereitungsartId)) return;
     if (!freiChecked) { toast.error("Bitte bestätigen Sie die Pflichtangabe."); return; }
     setSaving(true);
     try {
@@ -329,7 +368,7 @@ function ScheuernWischModal({ stations, onClose, onSaved }: ZimmerModalProps) {
         room_id:             roomId,
         category:            "room_cleaning",
         cleaning_type:       "schlussdesinfektion",
-        aufbereitungsart_id: aufbereitungsartId,
+        aufbereitungsart_id: aufbereitungsartId || undefined,
         pathogens:           [],
         wunschtermin,
       });
@@ -370,7 +409,7 @@ function ScheuernWischModal({ stations, onClose, onSaved }: ZimmerModalProps) {
         </div>
 
         {/* Desinfektionsart */}
-        <div className="space-y-1">
+        {artPflicht && <div className="space-y-1">
           <label className="label">Desinfektionsart *</label>
           <select className="input w-full" value={aufbereitungsartId} onChange={e => setAufbereitungsartId(e.target.value)}>
             <option value="">— Desinfektionsart auswählen —</option>
@@ -379,7 +418,7 @@ function ScheuernWischModal({ stations, onClose, onSaved }: ZimmerModalProps) {
           {selectedArt?.when_to_use && (
             <p className="text-xs text-slate-500 mt-1">ℹ️ {selectedArt.when_to_use}</p>
           )}
-        </div>
+        </div>}
 
         {/* Wunschtermin */}
         <div className="space-y-1">
@@ -404,7 +443,7 @@ function ScheuernWischModal({ stations, onClose, onSaved }: ZimmerModalProps) {
         </label>
 
         <div className="flex gap-2 pt-1">
-          <button onClick={submit} disabled={saving || !stationId || !roomId || !aufbereitungsartId || !freiChecked}
+          <button onClick={submit} disabled={saving || !stationId || !roomId || (artPflicht && !aufbereitungsartId) || !freiChecked}
             className="btn-primary flex-1">
             {saving ? "Wird gespeichert…" : "Scheuer-Wisch anfordern"}
           </button>
@@ -616,6 +655,9 @@ interface SpindRequest { id: string; vorname: string; nachname: string; berufsgr
 export default function MeineStation() {
   const toast = useToast();
   const { user, can } = useAuth();
+  const { isActive, loading: modulesLoading } = useModules();
+  // Knöpfe nur für aktive Module (während des Ladens alles zeigen, damit nichts springt)
+  const modulAn = (key: string) => modulesLoading || isActive(key);
   const [stations, setStations]   = useState<Station[]>([]);
   const [tasks, setTasks]         = useState<Task[]>([]);
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
@@ -726,7 +768,7 @@ export default function MeineStation() {
             <div className="flex items-center gap-2 mt-1.5">
               <span className={`w-2 h-2 rounded-full inline-block ${activeCount > 0 ? "bg-amber-400 animate-pulse" : "bg-emerald-500"}`} />
               <span className="text-sm text-slate-500">
-                {activeCount > 0 ? `${activeCount} aktive Aufträge` : "Alle Aufträge erledigt"}
+                {activeCount > 0 ? `${activeCount} ${activeCount === 1 ? "aktiver Auftrag" : "aktive Aufträge"}` : "Alle Aufträge erledigt"}
               </span>
               <LiveIndicator label={updatedLabel} />
             </div>
@@ -756,31 +798,39 @@ export default function MeineStation() {
         {/* Action-Buttons in einer Zeile darunter */}
         <div className="px-4 py-3 flex gap-2 flex-wrap border-t border-white/60"
           style={{ background: "rgba(255,255,255,0.5)" }}>
-          <button className="btn-outline !py-1.5 !px-3 !text-xs" onClick={() => setShowDefect(true)}>
-            🔧 Defektes Bett
-          </button>
-          {(can("zimmerreinigung") || can("stationspersonal")) && (
+          {modulAn("bed_defects") && (
+            <button className="btn-outline !py-1.5 !px-3 !text-xs" onClick={() => setShowDefect(true)}>
+              🔧 Defektes Bett
+            </button>
+          )}
+          {modulAn("room_cleaning") && (can("zimmerreinigung") || can("stationspersonal")) && (
             <button className="btn-outline !py-1.5 !px-3 !text-xs" onClick={() => setShowZimmer(true)}>
               🧹 Scheuer-Wisch
             </button>
           )}
-          <button className="btn-outline !py-1.5 !px-3 !text-xs" onClick={() => setShowSpind(true)}>
-            🔐 Spind-Anfrage
-          </button>
-          <button className="btn-outline !py-1.5 !px-3 !text-xs" onClick={() => setShowO2(true)}>
-            💨 Sauerstoff
-          </button>
+          {modulAn("spindverwaltung") && (
+            <button className="btn-outline !py-1.5 !px-3 !text-xs" onClick={() => setShowSpind(true)}>
+              🔐 Spind-Anfrage
+            </button>
+          )}
+          {modulAn("oxygen_transport") && (
+            <button className="btn-outline !py-1.5 !px-3 !text-xs" onClick={() => setShowO2(true)}>
+              💨 Sauerstoff
+            </button>
+          )}
           <button className="btn-outline !py-1.5 !px-3 !text-xs" onClick={() => setShowRuecksendung(true)}>
             📦 Rücksendung
           </button>
-          {(can("waesche") || can("verwaltung")) && (
+          {modulAn("waesche") && (can("waesche") || can("verwaltung")) && (
             <button className="btn-outline !py-1.5 !px-3 !text-xs" onClick={() => setShowWaesche(true)}>
               🛏 Kissen & Bettdecken
             </button>
           )}
-          <button className="btn-primary !py-1.5 !px-3 !text-xs" onClick={() => setShowReinigung(true)}>
-            🛏 Bettenreinigung anfordern
-          </button>
+          {modulAn("bed_cleaning") && (
+            <button className="btn-primary !py-1.5 !px-3 !text-xs" onClick={() => setShowReinigung(true)}>
+              🛏 Bettenreinigung anfordern
+            </button>
+          )}
         </div>
       </div>
 

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { api } from "../../api/client";
 import { RowActions, EditModal } from "./shared";
+import { confirmDialog } from "../../components/Dialog";
 
 function BedTypeTab() {
   const [items, setItems] = useState<any[]>([]);
@@ -30,7 +31,7 @@ function BedTypeTab() {
     refresh();
   }
   async function remove(id: string, n: string) {
-    if (!confirm(`Bett-Typ „${n}" löschen?`)) return;
+    if (!(await confirmDialog(`Bett-Typ „${n}" löschen?`, { danger: true }))) return;
     await api.delete(`/bed-types/${id}`);
     refresh();
   }

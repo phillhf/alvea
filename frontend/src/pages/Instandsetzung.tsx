@@ -64,15 +64,15 @@ function formatDate(iso: string) {
 }
 
 function standort(d: Defect): string {
-  // Standort aus notes extrahieren falls vorhanden (Format: "Station: X | Standort: Y")
-  if (d.notes) {
-    const match = d.notes.match(/Standort:\s*(.+)/);
-    if (match) return match[1].trim();
-  }
+  // Station/Zimmer kommen aus den Feldern der Meldung; der freie Standort-Text
+  // steht in notes ("Standort: Y" – ältere Meldungen auch "Station: X | Standort: Y")
+  const freitext = d.notes?.match(/Standort:\s*(.+)/)?.[1].trim();
+  const stationAusNotiz = d.notes?.match(/Station:\s*([^|]+)/)?.[1].trim();
   const parts = [
-    d.station_name,
+    d.station_name ?? stationAusNotiz,
     d.room_number && `Zi. ${d.room_number}`,
     d.bed_number  && `Bett ${d.bed_number}`,
+    freitext,
   ].filter(Boolean);
   return parts.join(" · ") || "–";
 }

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { api } from "../api/client";
+import { confirmDialog } from "../components/Dialog";
 import { useToast } from "../contexts/ToastContext";
 import { BarcodeInput } from "../components/BarcodeInput";
 
@@ -94,8 +95,9 @@ export default function OxygenTransport() {
 
     // Wenn weniger gescannt als bestellt: Bestätigung + Anpassung anbieten
     if (gescannt < bestellt) {
-      const adjust = window.confirm(
-        `Bestellt: ${bestellt} Flaschen\nGescannt: ${gescannt} Flaschen\n\nAnzahl der Anfrage auf ${gescannt} anpassen und als geliefert markieren?`
+      const adjust = await confirmDialog(
+        `Bestellt: ${bestellt} Flaschen\nGescannt: ${gescannt} Flaschen\n\nAnzahl der Anfrage auf ${gescannt} anpassen und als geliefert markieren?`,
+        { confirmLabel: "Anpassen und liefern" }
       );
       if (!adjust) return;
       await api.patch(`/o2/anfragen/${aktivAnfrage.id}/anzahl`, { anzahl: gescannt }).catch(() => {});

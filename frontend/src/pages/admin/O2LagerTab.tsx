@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { api } from "../../api/client";
 import { useToast } from "../../contexts/ToastContext";
+import { confirmDialog } from "../../components/Dialog";
 
 interface Lager { id: string; name: string; house_id: string | null; house_name: string | null; }
 interface House  { id: string; name: string; }
@@ -40,7 +41,7 @@ export default function O2LagerTab() {
   }
 
   async function handleDelete(id: string) {
-    if (!confirm("Lager löschen?")) return;
+    if (!(await confirmDialog("Lager löschen?", { danger: true }))) return;
     try { await api.delete(`/o2/lager/${id}`); load(); toast.success("Gelöscht."); }
     catch { toast.error("Fehler."); }
   }

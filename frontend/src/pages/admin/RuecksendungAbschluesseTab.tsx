@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { api } from "../../api/client";
 import { useToast } from "../../contexts/ToastContext";
+import { confirmDialog } from "../../components/Dialog";
 
 interface Abschluss { id: string; name: string; sort_order: number; }
 
@@ -33,7 +34,7 @@ export default function RuecksendungAbschluesseTab() {
   }
 
   async function handleDelete(id: string) {
-    if (!confirm("Eintrag löschen?")) return;
+    if (!(await confirmDialog("Eintrag löschen?", { danger: true }))) return;
     try { await api.delete(`/ruecksendung-abschluesse/${id}`); load(); toast.success("Gelöscht."); }
     catch { toast.error("Fehler."); }
   }

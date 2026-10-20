@@ -1,6 +1,7 @@
 import { useRef, useState, useEffect } from "react";
 import { api } from "../../api/client";
 import { useRaumbuch } from "../../contexts/RaumbuchContext";
+import { alertDialog } from "../../components/Dialog";
 
 interface FieldDef {
   key: string; label: string; entity: string;
@@ -58,7 +59,7 @@ export default function ImportTab() {
       setMapping(autoMap);
       setStep("mapping");
     } catch (err: any) {
-      alert("Fehler beim Lesen der Datei: " + (err.response?.data?.message ?? err.message));
+      alertDialog("Fehler beim Lesen der Datei: " + (err.response?.data?.message ?? err.message));
     } finally { setBusy(false); }
   }
 
@@ -77,7 +78,7 @@ export default function ImportTab() {
       setResult(r.data.stats); setStep("done"); reload();
     } catch (err: any) {
       const msg = err.response?.data?.message ?? err.message ?? "Unbekannter Fehler";
-      alert("Import fehlgeschlagen: " + msg);
+      alertDialog("Import fehlgeschlagen: " + msg);
     } finally { setBusy(false); }
   }
 

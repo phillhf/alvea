@@ -80,6 +80,9 @@ Diese Regeln stammen aus realen Fehlern – bitte einhalten:
 - Dynamische Tailwind-Klassen funktionieren nicht – Farben über CSS-Variablen: `style={{ backgroundColor: "var(--brand-600)" }}`.
 - Alle CSS-Variablen stehen in einem `:root`-Block in `index.css`.
 - Dateien mit JSX → `.tsx`, reine Hooks/Logik → `.ts`.
+- Keine `window.confirm()`/`alert()`: stattdessen `confirmDialog()`/`alertDialog()` aus `components/Dialog.tsx` (`await` nötig; `{ danger: true }` für Löschen u. ä.).
+- Schriften nur lokal über `@fontsource` einbinden (`FONT_PAIRS` in `ThemeContext.tsx`), keine externen Font-Dienste.
+- Formulare: Ist der Nutzer nur einer Station zugeordnet, wird sie vorausgewählt und die Auswahl ausgeblendet; Knöpfe für abgeschaltete Module ausblenden (`useModules().isActive`).
 - UI-Texte und Code-Kommentare auf Deutsch.
 
 ## Konfiguration zur Laufzeit

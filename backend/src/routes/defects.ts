@@ -89,6 +89,8 @@ const createSchema = z.object({
   description:     z.string().optional(),
   severity:        z.enum(["low","medium","high","critical","niedrig","normal","hoch","kritisch"]).default("medium"),
   notes:           z.string().optional(),
+  station_id:      z.string().optional(),
+  room_id:         z.string().optional(),
 });
 
 // GET /api/defects/my – eigene Meldungen (stationspersonal + bettenaufbereitung)
@@ -103,7 +105,7 @@ router.get("/my", requirePermission("stationspersonal", "bettenaufbereitung", "v
     FROM bed_defects d
     LEFT JOIN beds b ON b.id = d.bed_id
     LEFT JOIN rooms r ON r.id = COALESCE(d.room_id, b.room_id)
-    LEFT JOIN areas s ON s.id = COALESCE(r.area_id, r.station_id)
+    LEFT JOIN areas s ON s.id = COALESCE(d.station_id, r.area_id, r.station_id)
     WHERE d.reported_by = $1 AND d.status != 'ausgemustert'
     ORDER BY d.created_at DESC
     LIMIT 30
@@ -141,8 +143,8 @@ router.get("/", requirePermission("betten_reparatur", "verwaltung"), (req: Authe
     FROM bed_defects d
     LEFT JOIN beds b ON b.id = d.bed_id
     LEFT JOIN bed_types bt ON bt.id = b.bed_type_id
-    LEFT JOIN rooms r ON r.id = b.room_id
-    LEFT JOIN areas s ON s.id = COALESCE(r.area_id, r.station_id)
+    LEFT JOIN rooms r ON r.id = COALESCE(d.room_id, b.room_id)
+    LEFT JOIN areas s ON s.id = COALESCE(d.station_id, r.area_id, r.station_id)
     LEFT JOIN users u ON u.id = d.reported_by
     LEFT JOIN users a ON a.id = d.assigned_to
     ${where}
@@ -167,8 +169,8 @@ router.get("/:id", (req, res) => {
     FROM bed_defects d
     LEFT JOIN beds b ON b.id = d.bed_id
     LEFT JOIN bed_types bt ON bt.id = b.bed_type_id
-    LEFT JOIN rooms r ON r.id = b.room_id
-    LEFT JOIN areas s ON s.id = COALESCE(r.area_id, r.station_id)
+    LEFT JOIN rooms r ON r.id = COALESCE(d.room_id, b.room_id)
+    LEFT JOIN areas s ON s.id = COALESCE(d.station_id, r.area_id, r.station_id)
     LEFT JOIN users u ON u.id = d.reported_by
     LEFT JOIN users a ON a.id = d.assigned_to
     WHERE d.id = $1
@@ -183,10 +185,10 @@ router.post("/", (req: AuthedRequest, res) => {
   const d = createSchema.parse(req.body);
   const id = newId();
   query(
-    `INSERT INTO bed_defects (id,bed_id,scanned_barcode,title,description,severity,notes,reported_by)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
+    `INSERT INTO bed_defects (id,bed_id,scanned_barcode,title,description,severity,notes,reported_by,station_id,room_id)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`,
     [id, d.bed_id ?? null, d.scanned_barcode ?? null, d.title, d.description ?? null,
-     mapSev(d.severity), d.notes ?? null, req.user!.sub]
+     mapSev(d.severity), d.notes ?? null, req.user!.sub, d.station_id ?? null, d.room_id ?? null]
   );
   audit(req.user!.sub, "create", "defect", id);
   const { rows } = query(`SELECT * FROM bed_defects WHERE id=$1`, [id]);

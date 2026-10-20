@@ -1,6 +1,7 @@
 import { useToast } from "../../contexts/ToastContext";
 import { useEffect, useRef, useState } from "react";
 import { api } from "../../api/client";
+import { confirmDialog } from "../../components/Dialog";
 import { RowActions, EditModal } from "./shared";
 
 function PathogenTab() {
@@ -52,12 +53,10 @@ function PathogenTab() {
     refresh();
   }
   async function remove(code: string, name: string) {
-    if (
-      !confirm(
-        `Krankheitserreger „${name}" (${code}) löschen? Bereits angelegte Aufträge behalten den Code in ihrer Historie.`
-      )
-    )
-      return;
+    if (!(await confirmDialog(
+      `Krankheitserreger „${name}" (${code}) löschen? Bereits angelegte Aufträge behalten den Code in ihrer Historie.`,
+      { danger: true }
+    ))) return;
     await api.delete(`/pathogens/${code}`);
     refresh();
   }

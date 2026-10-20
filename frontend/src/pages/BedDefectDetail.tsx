@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { api } from "../api/client";
 import { useAuth } from "../contexts/AuthContext";
+import { confirmDialog } from "../components/Dialog";
 
 const SEVERITY_LABEL: Record<string, string> = {
   low: "Niedrig", medium: "Mittel", high: "Hoch", critical: "Kritisch",
@@ -78,7 +79,7 @@ export default function BedDefectDetail() {
     const labels: Record<string, string> = {
       in_reparatur: "In Reparatur", behoben: "Behoben", ausgemustert: "Ausgemustert",
     };
-    if (!confirm(`Status auf "${labels[status] ?? status}" setzen?`)) return;
+    if (!(await confirmDialog(`Status auf "${labels[status] ?? status}" setzen?`))) return;
     setBusy(true);
     try {
       await api.patch(`/defects/${id}/status`, { status, notes: notes || undefined });
@@ -93,7 +94,7 @@ export default function BedDefectDetail() {
     if (!physBed) return;
     const sperren = !physBed.gesperrt;
     if (sperren && !showSperrInput) { setShowSperrInput(true); return; }
-    if (!sperren && !confirm("Bett entsperren?")) return;
+    if (!sperren && !(await confirmDialog("Bett entsperren?"))) return;
     setSperrBusy(true);
     try {
       await api.patch(`/physical-beds/${physBed.id}/sperren`, {

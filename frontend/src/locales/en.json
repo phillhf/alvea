@@ -1,6 +1,6 @@
 {
   "app": "Alvea",
-  "auth": { "email":"Username","password":"Password","login":"Sign in","logout":"Sign out","invalid":"Invalid credentials" },
+  "auth": { "email":"E-mail","password":"Password","login":"Sign in","logout":"Sign out","invalid":"Invalid credentials" },
   "nav": { "beds":"Bed Reprocessing","rooms":"Room Cleaning","reports":"Reports","admin":"Admin" },
   "dashboard": {
     "myAreas":"My Areas","noAreas":"No area assigned yet. Please contact your supervisor.",

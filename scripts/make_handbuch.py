@@ -371,11 +371,11 @@ story += [P("Die Stationsübersicht zeigt alle Stationen im eigenen Bereich, sor
 story += [P("8.1 Auftrag bearbeiten", h2)]
 story.append(tbl([
     ["Schritt", "Aktion"],
-    ["1", "Station antippen → Auftrag antippen"],
-    ["2", "<b>Auf dem Weg</b> – Kollegen sehen, dass der Auftrag übernommen ist"],
-    ["3", "<b>Angekommen</b> – Auftrag im Zimmer annehmen, Reinigung beginnt"],
+    ["1", "In der Stationsübersicht <b>Auf dem Weg zur Station</b> – Kollegen sehen, dass die Station übernommen ist"],
+    ["2", "<b>Auf der Station angekommen</b> – die Station öffnet sich automatisch"],
+    ["3", "Beim Bett <b>Annehmen</b> – der Auftrag startet sofort"],
     ["4", "Checkliste abhaken, bei Bedarf Fotos aufnehmen"],
-    ["5", "Barcode des Betts scannen (empfohlen, erzeugt die Reisehistorie des Betts)"],
+    ["5", "Barcode des Betts eingeben oder scannen (empfohlen, erzeugt die Reisehistorie) – er wird beim Abschließen automatisch gespeichert"],
     ["6", "<b>Als erledigt melden</b>"],
 ], [16 * mm, 154 * mm]))
 story += [P("8.2 Infektiöse Aufbereitung", h2)]
@@ -388,7 +388,7 @@ story += [P("Für die zentrale Aufbereitung im Aufbereitungsraum. Es gibt keinen
 story.append(tbl([
     ["Schritt", "Inhalt"],
     ["1 – Barcode", "Eingeben, aus der Liste wählen oder per Kamera scannen"],
-    ["2 – Bett-Typ", "Welcher Bett-Typ wird aufbereitet?"],
+    ["2 – Bett-Typ", "Wird automatisch aus dem Bettenstamm übernommen, wenn der Barcode dort bekannt ist – sonst auswählen"],
     ["3 – ISO-Bett", "Isolationsbetten werden rot markiert"],
     ["4 – Erreger", "Falls bekannt (optional)"],
     ["5 – Desinfektionsmaßnahme", "Verfahren mit Anleitung und Hinweis „Wann anwenden?“"],
@@ -404,17 +404,19 @@ story.append(tbl([
     ["Schlussdesinfektion", "Nach Isolation bzw. infektiösen Patienten", "Erreger auswählbar"],
 ], [42 * mm, 68 * mm, 60 * mm]))
 story += [SP(2), P("Aufträge entstehen über Meine Station (Pflegepersonal) oder direkt in Scheuer-Wisch. Die Zimmerübersicht zeigt je Zimmer "
-                   "den Status; laufende Aufträge stehen im Abschnitt „In Bearbeitung“.", body)]
+                   "den Status; laufende Aufträge stehen im Abschnitt „In Bearbeitung“. Die Desinfektionsart ist nur Pflicht, "
+                   "wenn unter Verwaltung Desinfektionsmaßnahmen angelegt sind; gibt es genau eine, ist sie vorausgewählt.", body)]
 
 # ── 11. Meine Station ────────────────────────────────────────────────────────
 chapter("Meine Station (Pflegepersonal)", new_page=True)
 story += [P("Startseite für Pflegepersonal (Berechtigung <i>stationspersonal</i>). Zeigt nur die eigene Station, die in der Seitenleiste mit "
-            "ihrem Namen erscheint.", body), SP(2)]
+            "ihrem Namen erscheint. Ist man nur einer Station zugeordnet, wird sie in allen Formularen automatisch gewählt. "
+            "Knöpfe für abgeschaltete Module werden nicht angezeigt.", body), SP(2)]
 story.append(tbl([
     ["Funktion", "Beschreibung"],
-    ["Bettenreinigung anfordern", "Zimmer → Bett → Normal oder Infektiös → Absenden"],
+    ["Bettenreinigung anfordern", "Bett in der Zimmerübersicht antippen → Normal oder Infektiös → Absenden"],
     ["Scheuer-Wisch anfordern", "Zimmer und Reinigungsart wählen"],
-    ["Defektes Bett melden", "Barcode (optional), Standort, Beschreibung"],
+    ["Defektes Bett melden", "Was ist defekt? – optional Zimmer, Barcode und genauer Standort"],
     ["Sauerstoff anfordern", "Anzahl, Flaschentyp, Notiz – Status: Offen → Unterwegs → Geliefert"],
     ["Rücksendung melden", "Artikel mit Menge und Grund je Artikel; Begleitschein-PDF öffnet automatisch"],
     ["Kissen &amp; Bettdecken anfordern", "Wäschetyp und Menge"],
@@ -540,20 +542,23 @@ story += [P("Gemeinsamer Chat aller Stationen (Modul <i>Stations-Chat</i>, Berec
 
 # ── 22. Verwaltung ───────────────────────────────────────────────────────────
 chapter("Verwaltung", new_page=True)
-story += [P("Bereich <b>Verwaltung</b> (Berechtigung <i>verwaltung</i>):", body), SP(2)]
+story += [P("Die <b>Verwaltung</b> (Berechtigung <i>verwaltung</i>) startet mit einer Übersicht: oben Verknüpfungen zu Raumbuch und "
+            "Benutzer &amp; Rollen, darunter die Bereiche in drei Gruppen – <b>Fachliche Stammdaten</b>, <b>Darstellung &amp; Module</b> und "
+            "<b>System</b>. Innerhalb eines Bereichs wechselt die Leiste oben zwischen den Bereichen derselben Gruppe; "
+            "„← Verwaltung“ führt zurück zur Übersicht.", body), SP(2)]
 story.append(tbl([
-    ["Tab", "Inhalt"],
+    ["Bereich", "Inhalt"],
     ["Bett-Typen", "Eigene Bett-Typen"],
     ["Krankheitserreger", "Erreger mit Risiko, Desinfektionsmittel, Material, Schutzmaßnahmen"],
-    ["Desinfektionsmaßnahmen", "Verfahren für Bett-Zentral mit Anleitung"],
+    ["Desinfektionsmaßnahmen", "Verfahren für Bett-Zentral und Scheuer-Wisch mit Anleitung"],
     ["Berufsgruppen", "Auswahlwerte für Spind-Anfragen"],
     ["Anleitungen", "Allgemeine Reinigungsanleitungen"],
     ["Einstellungen", "Prioritätsscore, Farbschwellen, Datenhaltung"],
-    ["Design", "Farben, Schriften, App-Name, Hintergrundbild, Login-Seite"],
+    ["Design", "Farben, Schriften (alle lokal mitgeliefert), App-Name, Hintergrundbild, Login-Seite"],
     ["Module", "Module ein- und ausschalten"],
     ["Backup", "Tägliche Sicherung auf lokalen Pfad oder Netzlaufwerk"],
-    ["O2", "Sauerstofflager, Flaschentypen, Flaschen"],
-    ["Rücks.-Gründe", "Abschlussgründe für Rücksendungen"],
+    ["Sauerstoff", "Sauerstofflager, Flaschentypen, Flaschen"],
+    ["Rücksendungs-Gründe", "Abschlussgründe für Rücksendungen"],
     ["Audit-Log", "Protokoll aller Änderungen"],
     ["Wäschetypen", "Typen für Kissen &amp; Bettdecken"],
     ["Update", "Versionsprüfung und Update über GitHub (Kapitel 3)"],

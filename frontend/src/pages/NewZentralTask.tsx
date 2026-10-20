@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { api } from "../api/client";
 import { BarcodeScanner } from "../components/BarcodeScanner";
 import { BarcodeInput } from "../components/BarcodeInput";
+import { alertDialog } from "../components/Dialog";
 
 interface BedType { id: string; name: string; description: string | null }
 interface Aufbereitungsart {
@@ -53,6 +54,21 @@ export default function NewZentralTask() {
     api.get("/barcodes").then((r) => setBarcodes((r.data as any[]).map((b: any) => b.code)));
   }, []);
 
+  // Bett-Typ aus dem Bettenstamm übernehmen, sobald ein bekannter Barcode eingegeben ist
+  const [typVomBettenstamm, setTypVomBettenstamm] = useState(false);
+  useEffect(() => {
+    const code = barcode.trim();
+    if (!code) { setTypVomBettenstamm(false); return; }
+    const t = setTimeout(() => {
+      api.get(`/physical-beds/by-barcode/${encodeURIComponent(code)}`)
+        .then(r => {
+          if (r.data?.bed_type_id) { setBedTypeId(r.data.bed_type_id); setTypVomBettenstamm(true); }
+        })
+        .catch(() => setTypVomBettenstamm(false));
+    }, 300);
+    return () => clearTimeout(t);
+  }, [barcode]);
+
   function togglePathogen(code: string) {
     const s = new Set(selected);
     s.has(code) ? s.delete(code) : s.add(code);
@@ -77,7 +93,7 @@ export default function NewZentralTask() {
       });
       nav("/zentral");
     } catch (e: any) {
-      alert(e.response?.data?.error || "Fehler");
+      alertDialog(e.response?.data?.error || "Fehler");
     } finally { setSaving(false); }
   }
 
@@ -127,6 +143,7 @@ export default function NewZentralTask() {
         <div className="card space-y-3">
           <h2 className="font-semibold text-slate-700 flex items-center gap-2">
             <StepBadge n={2} /> Bett-Typ
+            {typVomBettenstamm && <span className="text-xs font-normal text-emerald-600">✓ aus Bettenstamm übernommen</span>}
           </h2>
           {bedTypes.length === 0 ? (
             <p className="text-sm text-slate-400 italic">Keine Bett-Typen angelegt – bitte unter Verwaltung anlegen.</p>

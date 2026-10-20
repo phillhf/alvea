@@ -110,7 +110,7 @@ Alvea-Setup-1.0.0.exe /VERYSILENT /DIR="D:\Alvea" /PORT=8080
 
 Alvea aktualisiert sich direkt aus den [GitHub-Releases](https://github.com/phillhf/alvea/releases).
 
-**In der Weboberfläche:** *Verwaltung → ⬆️ Update* zeigt installierte und neueste Version samt Änderungen. **„Jetzt aktualisieren“** startet das Update; die Seite lädt sich nach 1–3 Minuten automatisch mit der neuen Version neu.
+**In der Weboberfläche:** *Verwaltung → Update* zeigt installierte und neueste Version samt Änderungen. **„Jetzt aktualisieren“** startet das Update; die Seite lädt sich nach 1–3 Minuten automatisch mit der neuen Version neu.
 
 **Auf dem Server:** Startmenü → *Alvea → Nach Updates suchen*.
 

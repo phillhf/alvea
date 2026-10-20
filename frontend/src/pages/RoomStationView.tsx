@@ -5,6 +5,7 @@ import { api } from "../api/client";
 import { useAuth } from "../contexts/AuthContext";
 import { useLastUpdated } from "../hooks/useLastUpdated";
 import { LiveIndicator } from "../components/LiveIndicator";
+import { alertDialog } from "../components/Dialog";
 
 interface Task {
   id: string; status: string; cleaning_type: string;
@@ -72,7 +73,7 @@ export default function RoomStationView() {
       await api.post(`/tasks/${taskId}/claim`);
       nav(`/tasks/${taskId}`);
     } catch (e: any) {
-      alert(e.response?.data?.error || "Fehler");
+      alertDialog(e.response?.data?.error || "Fehler");
     }
   }
 
@@ -103,7 +104,7 @@ export default function RoomStationView() {
           <div className="flex items-center gap-3 mt-0.5 flex-wrap">
             <span className="text-sm text-slate-500">{tr("nav.rooms")}</span>
             {totalTasks > 0 && (
-              <span className="badge bg-amber-100 text-amber-800 text-xs">{totalTasks} aktive Aufträge</span>
+              <span className="badge bg-amber-100 text-amber-800 text-xs">{totalTasks} {totalTasks === 1 ? "aktiver Auftrag" : "aktive Aufträge"}</span>
             )}
             <LiveIndicator label={updatedLabel} />
           </div>

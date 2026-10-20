@@ -1,7 +1,7 @@
 {
   "app": "Alvea",
   "auth": {
-    "email": "Benutzername",
+    "email": "E-Mail",
     "password": "Passwort",
     "login": "Anmelden",
     "logout": "Abmelden",

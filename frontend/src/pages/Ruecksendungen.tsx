@@ -3,6 +3,7 @@ import { SkeletonList } from "../components/Skeleton";
 import { api } from "../api/client";
 import { useToast } from "../contexts/ToastContext";
 import { useAuth } from "../contexts/AuthContext";
+import { confirmDialog } from "../components/Dialog";
 
 interface ArtikelItem { artikel: string; menge: string; }
 interface Ruecksendung {
@@ -77,7 +78,7 @@ function AnhaengeBox({ r, onRefresh }: { r: Ruecksendung; onRefresh: () => void 
   }
 
   async function remove(url: string) {
-    if (!confirm("Anhang löschen?")) return;
+    if (!(await confirmDialog("Anhang löschen?", { danger: true }))) return;
     try {
       await api.delete(`/ruecksendungen/${r.id}/anhang`, { data: { url } });
       onRefresh();
@@ -214,7 +215,7 @@ export default function Ruecksendungen() {
   }
 
   async function handleDelete(id: string) {
-    if (!confirm("Rücksendung löschen?")) return;
+    if (!(await confirmDialog("Rücksendung löschen?", { danger: true }))) return;
     try { await api.delete(`/ruecksendungen/${id}`); load(); loadCounts(); toast.success("Gelöscht."); }
     catch { toast.error("Fehler."); }
   }

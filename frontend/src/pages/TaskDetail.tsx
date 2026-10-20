@@ -6,6 +6,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { CameraCapture } from "../components/CameraCapture";
 import { BarcodeScanner } from "../components/BarcodeScanner";
 import { BarcodeInput } from "../components/BarcodeInput";
+import { confirmDialog, alertDialog } from "../components/Dialog";
 
 interface Pathogen { code: string; name: string; disinfectant: string | null; cleaning_agent: string | null; hygiene_notes: string | null; }
 interface TaskDetail {
@@ -108,7 +109,7 @@ export default function TaskDetail() {
     refresh();
   }
   async function deleteTask() {
-    if (!confirm("Auftrag wirklich unwiderruflich löschen?")) return;
+    if (!(await confirmDialog("Auftrag wirklich unwiderruflich löschen?", { danger: true }))) return;
     await api.delete(`/tasks/${id}`);
     nav("/");
   }
@@ -190,14 +191,6 @@ export default function TaskDetail() {
                   placeholder="Barcode eingeben…"
                 />
                 <div className="flex gap-2">
-                  <button className="btn-ghost !py-1 text-xs"
-                    disabled={!barcodeInput.trim()}
-                    onClick={() => {
-                      doAction(() => api.patch(`/tasks/${id}`, { scanned_barcode: barcodeInput.trim() }));
-                      setBarcodeInput("");
-                    }}>
-                    Speichern
-                  </button>
                   <button
                     className="btn-ghost !py-1.5 text-sm"
                     onClick={() => setShowScanner(true)}>
@@ -206,7 +199,11 @@ export default function TaskDetail() {
                 </div>
               </div>
             )}
-            <p className="text-xs text-slate-400">Der Barcode wird für die Reisehistorie des physischen Betts gespeichert.</p>
+            <p className="text-xs text-slate-400">
+              {task.scanned_barcode
+                ? "Der Barcode wird für die Reisehistorie des physischen Betts gespeichert."
+                : "Wird beim Abschließen automatisch gespeichert. Ohne Barcode wird die Reisehistorie des Betts nicht aktualisiert."}
+            </p>
           </div>
         )}
 
@@ -221,19 +218,20 @@ export default function TaskDetail() {
         {task.status === "laufend" && mine && (
           <button className="btn-success w-full" disabled={busy}
             onClick={async () => {
-              if (task.category === "bed_cleaning" && !task.scanned_barcode) {
-                if (!confirm("⚠️ Kein Barcode erfasst!\n\nDie Reisehistorie dieses Betts wird nicht aktualisiert.\n\nTrotzdem abschließen?")) return;
-              }
+              // Eingegebener, noch nicht gespeicherter Barcode wird beim Abschließen übernommen
+              const typed = task.category === "bed_cleaning" && !task.scanned_barcode ? barcodeInput.trim() : "";
+              const code = task.scanned_barcode || typed;
               // Prüfen ob das Bett im Bettenstamm gesperrt ist
-              if (task.scanned_barcode) {
+              if (code) {
                 try {
-                  const r = await api.get(`/physical-beds/by-barcode/${encodeURIComponent(task.scanned_barcode)}`);
+                  const r = await api.get(`/physical-beds/by-barcode/${encodeURIComponent(code)}`);
                   if (r.data?.gesperrt) {
-                    alert(`🔒 ACHTUNG – Dieses Bett ist gesperrt!\n\nBitte das Bett physisch sperren/kennzeichnen, damit es nicht wieder in Betrieb genommen wird.\n\nGrund: ${r.data.gesperrt_grund || "–"}`);
+                    await alertDialog(`Bitte das Bett physisch sperren/kennzeichnen, damit es nicht wieder in Betrieb genommen wird.\n\nGrund: ${r.data.gesperrt_grund || "–"}`,
+                      { title: "🔒 Dieses Bett ist gesperrt", confirmLabel: "Verstanden" });
                   }
                 } catch { /* ignorieren */ }
               }
-              doAction(() => api.patch(`/tasks/${id}`, { status: "abgeschlossen" }));
+              doAction(() => api.patch(`/tasks/${id}`, { status: "abgeschlossen", ...(typed ? { scanned_barcode: typed } : {}) }));
             }}>
             ✓ Auftrag als erledigt melden
           </button>
@@ -241,8 +239,8 @@ export default function TaskDetail() {
         {/* Zurückgeben */}
         {["unterwegs", "angekommen", "laufend"].includes(task.status) && mine && (
           <button className="btn-ghost w-full" disabled={busy}
-            onClick={() => {
-              if (!confirm("Auftrag wirklich zurückgeben?\n\nDer Auftrag wird wieder als 'Offen' markiert und kann von einem anderen Mitarbeiter angenommen werden.")) return;
+            onClick={async () => {
+              if (!(await confirmDialog("Auftrag wirklich zurückgeben?\n\nDer Auftrag wird wieder als 'Offen' markiert und kann von einem anderen Mitarbeiter angenommen werden.", { danger: true }))) return;
               doAction(() => api.post(`/tasks/${id}/release`));
             }}>
             ↩ Auftrag zurückgeben
@@ -273,7 +271,7 @@ export default function TaskDetail() {
           }
         </h1>
         <div className="text-sm text-slate-500">
-          {isZentral ? (task.aufbereitungsart_name ?? "Bettenzentrale") : `${task.area_name} · ${task.station_name}`}
+          {isZentral ? (task.aufbereitungsart_name ?? "Bettenzentrale") : (task.area_name && task.area_name !== task.station_name ? `${task.area_name} · ${task.station_name}` : task.station_name)}
         </div>
         {task.scanned_barcode && <div className="text-xs text-slate-400 font-mono mt-0.5">📦 {task.scanned_barcode}</div>}
       </div>

@@ -3,6 +3,33 @@
 Alle wichtigen Änderungen an diesem Projekt werden hier dokumentiert.
 Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/), Versionen folgen [Semantic Versioning](https://semver.org/lang/de/).
 
+## [1.2.0] - 2026-10-20
+Bedienung überarbeitet – weniger Klicks in den täglichen Abläufen.
+
+### Geändert
+- **Bettenaufbereitung (Reinigungskraft): 4 statt 7 Schritte pro Bett.** „Auf der Station angekommen“ öffnet direkt die Station; „Annehmen“ startet den Auftrag sofort (kein zweites „Auftrag im Zimmer annehmen“); ein eingegebener Barcode wird beim Abschließen automatisch gespeichert (kein eigener Speichern-Knopf); keine Rückfrage mehr, wenn kein Barcode erfasst wurde.
+- **Bettenreinigung anfordern (Pflege):** Bett direkt in einer Zimmerübersicht antippen statt Zimmer- und Stellplatz-Auswahlliste; Station ist vorausgewählt, wenn man nur einer zugeordnet ist.
+- **Defekt melden:** Station vorausgewählt; Zimmer, Barcode und genauer Standort optional. Station und Zimmer werden als echte Felder gespeichert und in der Instandsetzung angezeigt.
+- **Scheuer-Wisch anfordern:** Desinfektionsart wird vorausgewählt, wenn es nur eine gibt; ohne angelegte Desinfektionsmaßnahmen ist das Anfordern nicht mehr blockiert.
+- **Bett-Zentral:** Bett-Typ wird aus dem Bettenstamm übernommen, sobald der Barcode dort bekannt ist.
+- **Meine Station:** Knöpfe für abgeschaltete Module (z. B. Sauerstoff, Spinde) werden ausgeblendet.
+- **Verwaltung:** Startübersicht mit drei Gruppen (Fachliche Stammdaten, Darstellung & Module, System) und Verknüpfungen zu Raumbuch und Benutzer & Rollen statt 14 Tabs auf einmal.
+- **Bestätigungen** erscheinen als einheitlicher Dialog im App-Design statt als Browser-Fenster; Löschen u. ä. mit rotem Knopf.
+- **Login:** Feld heißt „E-Mail“; der Passwort-Platzhalter sieht nicht mehr wie ein ausgefülltes Passwort aus.
+- **Standardfarbe** für neue Installationen ist Fluent-Blau (bestehende Design-Einstellungen bleiben unverändert).
+- Texte: Stationsname nicht mehr doppelt („Station 1A · Station 1A“), „1 aktiver Auftrag“.
+
+### Behoben
+- Nach dem Anmelden galten bis zum Neuladen der Seite alle Module als abgeschaltet – Menüpunkte wie Scheuer-Wisch oder Sauerstoff fehlten für Nicht-Administratoren. Die Modulliste wird jetzt bei jedem An- und Abmelden neu geladen.
+
+### Sicherheit
+- `/api/settings` liefert keine Backup-Einstellungen (Pfad, Benutzer, verschlüsseltes Passwort) mehr an normale Nutzer; Backup-Werte lassen sich nur noch über die Backup-Verwaltung ändern.
+
+### Datenschutz
+- Schriften werden ausschließlich lokal ausgeliefert – keine Verbindung mehr zu Google Fonts (vorher bei Schriftwahl im Design-Tab, zudem durch die eigene Sicherheitsrichtlinie blockiert).
+
+---
+
 ## [1.1.1] - 2026-10-20
 
 ### Behoben

@@ -7,6 +7,7 @@ import { ModulesProvider } from "./contexts/ModulesContext";
 import { registerSW } from "./sw-register";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { ErrorBoundary } from "./components/ErrorBoundary";
+import { DialogHost } from "./components/Dialog";
 import "@fontsource/plus-jakarta-sans/400.css";
 import "@fontsource/plus-jakarta-sans/500.css";
 import "@fontsource/plus-jakarta-sans/600.css";
@@ -25,6 +26,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
           <AuthProvider>
             <ModulesProvider>
               <App />
+              <DialogHost />
             </ModulesProvider>
           </AuthProvider>
         </ThemeProvider>

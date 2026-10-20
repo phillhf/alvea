@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../api/client";
 import { BarcodeScanner } from "../components/BarcodeScanner";
+import { alertDialog } from "../components/Dialog";
 
 interface Station {
   id: string;
@@ -32,7 +33,11 @@ export default function NewDefectReport() {
   const barcodeRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    api.get<Station[]>("/defects/stations").then(r => setStations(r.data));
+    api.get<Station[]>("/defects/stations").then(r => {
+      setStations(r.data);
+      // Nur eine Station → vorauswählen
+      if (r.data.length === 1) setStationId(r.data[0].id);
+    });
     api.get<Barcode[]>("/barcodes").then(r => setBarcodes(r.data));
   }, []);
 
@@ -54,26 +59,25 @@ export default function NewDefectReport() {
   }
 
   async function submit() {
-    if (!stationId || !location.trim() || !description.trim()) return;
+    if (!stationId || !description.trim()) return;
     setSaving(true);
     try {
-      // Standort in notes, Station-Name in title-Prefix
-      const stationName = stations.find(s => s.id === stationId)?.name ?? "";
       await api.post("/defects", {
         scanned_barcode: barcode.trim() || undefined,
         title:           description.trim(),
-        notes:           `Station: ${stationName} | Standort: ${location.trim()}`,
+        station_id:      stationId,
+        notes:           location.trim() ? `Standort: ${location.trim()}` : undefined,
         severity:        "medium",
       });
       nav("/");
     } catch (e: any) {
-      alert(e.response?.data?.error || "Fehler beim Speichern");
+      alertDialog(e.response?.data?.error || "Fehler beim Speichern");
     } finally {
       setSaving(false);
     }
   }
 
-  const valid = stationId && location.trim() && description.trim();
+  const valid = stationId && description.trim();
 
   return (
     <div className="max-w-lg space-y-5">
@@ -151,7 +155,7 @@ export default function NewDefectReport() {
 
       {/* Standort */}
       <div className="card space-y-1">
-        <label className="label">Wo steht das Bett? *</label>
+        <label className="label">Wo steht das Bett? <span className="text-slate-400 font-normal">(optional)</span></label>
         <input
           className="input"
           placeholder="z. B. Zimmer 12, Flur vor Stationszimmer, Lager"

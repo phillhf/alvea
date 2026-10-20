@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { api } from "../../api/client";
 import { useToast } from "../../contexts/ToastContext";
+import { confirmDialog } from "../../components/Dialog";
 
 interface Typ { id: string; name: string; beschreibung: string | null; }
 
@@ -35,7 +36,7 @@ export default function O2TypenTab() {
   }
 
   async function handleDelete(id: string) {
-    if (!confirm("Flaschentyp löschen?")) return;
+    if (!(await confirmDialog("Flaschentyp löschen?", { danger: true }))) return;
     try { await api.delete(`/o2/typen/${id}`); load(); toast.success("Gelöscht."); }
     catch { toast.error("Fehler."); }
   }

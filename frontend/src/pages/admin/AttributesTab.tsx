@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { api } from "../../api/client";
 import { EditModal } from "./shared";
+import { confirmDialog } from "../../components/Dialog";
 
 interface AttrDef {
   id: string; entity_type: string; name: string;
@@ -82,7 +83,7 @@ export default function AttributesTab() {
     await api.patch(`/attributes/definitions/${d.id}`, { active: !d.active }); load();
   }
   async function del(d: AttrDef) {
-    if (!confirm(`Attribut „${d.name}" löschen? Alle eingetragenen Werte gehen verloren.`)) return;
+    if (!(await confirmDialog(`Attribut „${d.name}" löschen? Alle eingetragenen Werte gehen verloren.`, { danger: true }))) return;
     await api.delete(`/attributes/definitions/${d.id}`); load();
   }
 

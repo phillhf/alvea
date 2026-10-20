@@ -2,6 +2,7 @@ import { useToast } from "../../contexts/ToastContext";
 import { useEffect, useState } from "react";
 import { api } from "../../api/client";
 import { RowActions, EditModal } from "./shared";
+import { confirmDialog } from "../../components/Dialog";
 
 function HouseTab() {
   const toast = useToast();
@@ -33,13 +34,13 @@ function HouseTab() {
   }
 
   async function remove(id: string, n: string) {
-    if (!confirm(`Haus „${n}" löschen? Alle Bereiche und Stationen darunter werden mit gelöscht.`)) return;
+    if (!(await confirmDialog(`Haus „${n}" löschen? Alle Bereiche und Stationen darunter werden mit gelöscht.`, { danger: true }))) return;
     try {
       await api.delete(`/houses/${id}`);
     } catch (e: any) {
       if (e.response?.status === 409) {
         const d = e.response.data;
-        if (!confirm(`Haus „${n}" enthält noch:\n• ${d.areas} Bereiche, ${d.stations} Stationen, ${d.beds} Betten\n• ${d.active_tasks} aktive Aufträge\n\nAlle Daten werden unwiderruflich gelöscht. Fortfahren?`)) return;
+        if (!(await confirmDialog(`Haus „${n}" enthält noch:\n• ${d.areas} Bereiche, ${d.stations} Stationen, ${d.beds} Betten\n• ${d.active_tasks} aktive Aufträge\n\nAlle Daten werden unwiderruflich gelöscht. Fortfahren?`, { danger: true }))) return;
         await api.delete(`/houses/${id}?force=true`);
       } else { toast.error(e.response?.data?.error || "Fehler beim Löschen"); return; }
     }

@@ -2,6 +2,7 @@ import { useToast } from "../../contexts/ToastContext";
 import { useEffect, useRef, useState } from "react";
 import { api } from "../../api/client";
 import { RowActions, EditModal } from "./shared";
+import { confirmDialog } from "../../components/Dialog";
 
 const ALL_PERMISSIONS = [
   { key: "bettenaufbereitung",         label: "Bettenaufb.-Dezentral",  desc: "Tab Bettenaufbereitung-Dezentral sichtbar" },
@@ -60,7 +61,7 @@ function RollenTab() {
   }
 
   async function remove(id: string, name: string) {
-    if (!confirm(`Rolle „${name}" löschen?`)) return;
+    if (!(await confirmDialog(`Rolle „${name}" löschen?`, { danger: true }))) return;
     try {
       await api.delete(`/roles/${id}`);
       refresh();

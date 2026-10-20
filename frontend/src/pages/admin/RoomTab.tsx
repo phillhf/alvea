@@ -4,6 +4,7 @@ import { api } from "../../api/client";
 import { RowActions, EditModal } from "./shared";
 import { useRaumbuch } from "../../contexts/RaumbuchContext";
 import { AttributeEditor } from "../../components/AttributeEditor";
+import { confirmDialog } from "../../components/Dialog";
 
 interface RoomType { id: string; name: string; icon: string; }
 
@@ -76,13 +77,13 @@ function RoomTab() {
   }
 
   async function remove(id: string, n: string) {
-    if (!confirm(`Raum „${n}" löschen?`)) return;
+    if (!(await confirmDialog(`Raum „${n}" löschen?`, { danger: true }))) return;
     try {
       await api.delete(`/rooms/${id}`);
     } catch (e: any) {
       if (e.response?.status === 409) {
         const d = e.response.data;
-        if (!confirm(`Raum enthält noch ${d.beds} Stellplätze / ${d.active_tasks} aktive Aufträge.\nFortfahren?`)) return;
+        if (!(await confirmDialog(`Raum enthält noch ${d.beds} Stellplätze / ${d.active_tasks} aktive Aufträge.\nFortfahren?`, { danger: true }))) return;
         await api.delete(`/rooms/${id}?force=true`);
       } else { toast.error("Fehler beim Löschen"); return; }
     }

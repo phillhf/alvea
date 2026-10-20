@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { api } from "../api/client";
+import { confirmDialog } from "../components/Dialog";
 
 interface Announcement {
   id: string; title: string; body: string;
@@ -91,7 +92,7 @@ export default function Meldungen() {
   }
 
   async function remove(id: string) {
-    if (!confirm("Meldung löschen?")) return;
+    if (!(await confirmDialog("Meldung löschen?", { danger: true }))) return;
     await api.delete(`/announcements/${id}`);
     load();
   }

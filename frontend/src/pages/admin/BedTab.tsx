@@ -5,6 +5,7 @@ import { api } from "../../api/client";
 import { RowActions, EditModal } from "./shared";
 import { TravelHistoryModal } from "./TravelHistoryModal";
 import { AttributeEditor } from "../../components/AttributeEditor";
+import { confirmDialog } from "../../components/Dialog";
 
 function BedTab() {
   const toast = useToast();
@@ -64,13 +65,13 @@ function BedTab() {
     refresh();
   }
   async function remove(id: string, n: string) {
-    if (!confirm(`Stellplatz ${n} löschen?`)) return;
+    if (!(await confirmDialog(`Stellplatz ${n} löschen?`, { danger: true }))) return;
     try {
       await api.delete(`/beds/${id}`);
     } catch (e: any) {
       if (e.response?.status === 409) {
         const d = e.response.data;
-        if (!confirm(`Stellplatz ${n} hat noch ${d.active_tasks} aktive Aufträge.\n\nAufträge werden unwiderruflich gelöscht. Fortfahren?`)) return;
+        if (!(await confirmDialog(`Stellplatz ${n} hat noch ${d.active_tasks} aktive Aufträge.\n\nAufträge werden unwiderruflich gelöscht. Fortfahren?`, { danger: true }))) return;
         await api.delete(`/beds/${id}?force=true`);
       } else { toast.error(e.response?.data?.error || "Fehler beim Löschen"); return; }
     }

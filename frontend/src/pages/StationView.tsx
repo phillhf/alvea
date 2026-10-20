@@ -6,6 +6,7 @@ import { api } from "../api/client";
 import { useAuth } from "../contexts/AuthContext";
 import { useLastUpdated } from "../hooks/useLastUpdated";
 import { LiveIndicator } from "../components/LiveIndicator";
+import { confirmDialog, alertDialog } from "../components/Dialog";
 
 interface Bed {
   id: string; bed_number: string; room_number: string; status: string;
@@ -60,7 +61,7 @@ function TaskCard({ task, onAction, prioSettings, prioYellow, prioRed }: {
 
   async function handleClaim() {
     try { await api.post(`/tasks/${task.id}/claim`); nav(`/tasks/${task.id}`); }
-    catch (e: any) { alert(e.response?.data?.error || "Fehler"); }
+    catch (e: any) { alertDialog(e.response?.data?.error || "Fehler"); }
   }
 
   return (
@@ -109,7 +110,11 @@ function TaskCard({ task, onAction, prioSettings, prioYellow, prioRed }: {
             }}>📍 Angekommen</button>
           )}
           {mine && canAct && task.status === "angekommen" && (
-            <button className="btn-primary !py-1 text-xs" onClick={() => nav(`/tasks/${task.id}`)}>
+            <button className="btn-primary !py-1 text-xs" onClick={async () => {
+              // Annehmen startet den Auftrag direkt – kein zweites "im Zimmer annehmen"
+              try { await api.patch(`/tasks/${task.id}`, { status: "laufend" }); nav(`/tasks/${task.id}`); }
+              catch (e: any) { alertDialog(e.response?.data?.error || "Fehler"); }
+            }}>
               ✋ Annehmen
             </button>
           )}
@@ -162,7 +167,7 @@ export default function StationView() {
     refresh();
   }
   async function leaveAll() {
-    if (!confirm("Station verlassen? Alle nicht gestarteten Aufträge werden freigegeben.")) return;
+    if (!(await confirmDialog("Station verlassen? Alle nicht gestarteten Aufträge werden freigegeben.", { danger: true }))) return;
     await api.post(`/stations/${id}/leave`);
     refresh();
   }
@@ -219,7 +224,7 @@ export default function StationView() {
           <Link to="/" className="text-sm text-slate-500 hover:underline">← Zurück</Link>
           <h1 className="font-display text-2xl font-bold">{stationName}</h1>
           <div className="flex items-center gap-3 flex-wrap">
-            <span className="text-sm text-slate-500">{activeCount} aktive Aufträge</span>
+            <span className="text-sm text-slate-500">{activeCount} {activeCount === 1 ? "aktiver Auftrag" : "aktive Aufträge"}</span>
             <LiveIndicator label={updatedLabel} />
           </div>
         </div>

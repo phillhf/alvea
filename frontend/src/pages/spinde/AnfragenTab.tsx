@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { api } from "../../api/client";
+import { confirmDialog, alertDialog } from "../../components/Dialog";
 
 interface LockerRequest {
   id: string;
@@ -73,12 +74,12 @@ export default function AnfragenTab({ onCountChange }: Props) {
         ends_at:   editEnd   || undefined,
       });
       setAssigning(null); load();
-    } catch (e: any) { alert(e.response?.data?.error || "Fehler"); }
+    } catch (e: any) { alertDialog(e.response?.data?.error || "Fehler"); }
     finally { setSaving(false); }
   }
 
   async function dismiss(id: string) {
-    if (!confirm("Anfrage ablehnen und löschen?")) return;
+    if (!(await confirmDialog("Anfrage ablehnen und löschen?", { danger: true }))) return;
     await api.delete(`/lockers/requests/${id}`);
     load();
   }

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { api } from "../../api/client";
 import { RowActions, EditModal } from "./shared";
 import { useRaumbuch } from "../../contexts/RaumbuchContext";
+import { confirmDialog } from "../../components/Dialog";
 
 function StationTab() {
   const toast = useToast();
@@ -51,13 +52,13 @@ function StationTab() {
     refresh();
   }
   async function remove(id: string, n: string) {
-    if (!confirm(`Station „${n}" löschen? Alle Zimmer und Betten darunter werden mit gelöscht.`)) return;
+    if (!(await confirmDialog(`Station „${n}" löschen? Alle Zimmer und Betten darunter werden mit gelöscht.`, { danger: true }))) return;
     try {
       await api.delete(`/stations/${id}`);
     } catch (e: any) {
       if (e.response?.status === 409) {
         const d = e.response.data;
-        if (!confirm(`Station „${n}" enthält noch:\n\u2022 ${d.rooms} Zimmer, ${d.beds} Betten\n\u2022 ${d.active_tasks} aktive Aufträge\n\nAlle Daten werden unwiderruflich gelöscht. Fortfahren?`)) return;
+        if (!(await confirmDialog(`Station „${n}" enthält noch:\n\u2022 ${d.rooms} Zimmer, ${d.beds} Betten\n\u2022 ${d.active_tasks} aktive Aufträge\n\nAlle Daten werden unwiderruflich gelöscht. Fortfahren?`, { danger: true }))) return;
         await api.delete(`/stations/${id}?force=true`);
       } else { toast.error(e.response?.data?.error || "Fehler beim Löschen"); return; }
     }

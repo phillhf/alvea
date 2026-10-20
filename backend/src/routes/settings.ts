@@ -33,16 +33,13 @@ const bgUpload = multer({
   },
 });
 
-// Sensitive Keys die nie im Klartext ans Frontend gehen
-const MASKED_KEYS = new Set<string>();
+// Backup-Einstellungen (Pfad, Netzwerk-Anmeldung, Passwort) liefert nur
+// /api/backup/settings an Nutzer mit "verwaltung" – hier nie, auch nicht maskiert.
+const isBackupKey = (key: string) => key.startsWith("backup_");
 
 router.get("/", (_req, res) => {
   const { rows } = query(`SELECT key, value, description, updated_at FROM settings ORDER BY key`);
-  const safe = (rows as any[]).map((r: any) => ({
-    ...r,
-    value: MASKED_KEYS.has(r.key) ? (r.value ? "••••••••" : "") : r.value,
-  }));
-  res.json(safe);
+  res.json((rows as any[]).filter((r: any) => !isBackupKey(r.key)));
 });
 
 router.get("/prio", (_req, res) => {
@@ -57,9 +54,7 @@ const ALLOWED_SETTING_KEYS = new Set([
   "prio_minutes", "prio_base", "prio_bonus",
   "prio_color_yellow", "prio_color_red",
   "theme_config", "login_theme_config",
-  "backup_enabled", "backup_path", "backup_time",
-  "backup_username", "backup_password",
-  "backup_last_run", "backup_last_status",
+  // backup_* nur über /api/backup/settings (verschlüsselt das Passwort)
   "sw_freitext",
 ]);
 

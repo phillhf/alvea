@@ -2,6 +2,7 @@ import { useToast } from "../../contexts/ToastContext";
 import { useEffect, useRef, useState } from "react";
 import { api } from "../../api/client";
 import { RowActions, EditModal } from "./shared";
+import { confirmDialog } from "../../components/Dialog";
 
 function BarcodeTab() {
   const toast = useToast();
@@ -34,7 +35,7 @@ function BarcodeTab() {
     }
   }
   async function remove(code: string, _label: string) {
-    if (!confirm(`Strichcode „${code}" löschen?`)) return;
+    if (!(await confirmDialog(`Strichcode „${code}" löschen?`, { danger: true }))) return;
     await api.delete(`/barcodes/${encodeURIComponent(code)}`);
     refresh();
   }

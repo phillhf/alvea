@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useParams, useNavigate, useLocation, Link } from "react-router-dom";
 import { api } from "../api/client";
+import { alertDialog } from "../components/Dialog";
 
 interface BedState {
   stationName?: string;
@@ -43,7 +44,7 @@ export default function NewBedDefect() {
       });
       nav("/bed-defects");
     } catch (e: any) {
-      alert(e.response?.data?.error || "Fehler beim Speichern");
+      alertDialog(e.response?.data?.error || "Fehler beim Speichern");
     } finally {
       setSaving(false);
     }

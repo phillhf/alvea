@@ -1,4 +1,5 @@
 import React from "react";
+import { confirmDialog } from "../../components/Dialog";
 
 /* Gemeinsame Komponenten für alle Admin-Tabs */
 
@@ -16,7 +17,7 @@ export function RowActions({
       <button className="btn-ghost !py-1 !px-2 text-xs" onClick={onEdit}>✎</button>
       <button
         className="btn-ghost !py-1 !px-2 text-xs text-status-danger"
-        onClick={() => confirm(confirmMsg) && onDelete()}
+        onClick={async () => { if (await confirmDialog(confirmMsg, { danger: true })) onDelete(); }}
       >🗑</button>
     </span>
   );

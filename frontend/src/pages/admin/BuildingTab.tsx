@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { api } from "../../api/client";
 import { RowActions, EditModal } from "./shared";
 import { useRaumbuch } from "../../contexts/RaumbuchContext";
+import { confirmDialog } from "../../components/Dialog";
 
 function BuildingTab() {
   const toast = useToast();
@@ -67,14 +68,14 @@ function BuildingTab() {
   }
 
   async function remove(id: string, name: string) {
-    if (!confirm(`Gebäude „${name}" löschen?`)) return;
+    if (!(await confirmDialog(`Gebäude „${name}" löschen?`, { danger: true }))) return;
     try {
       await api.delete(`/buildings/${id}`);
       refresh();
     } catch (e: any) {
       if (e.response?.status === 409) {
         const d = e.response.data;
-        if (!confirm(`Gebäude enthält noch ${d.areas} Bereiche/Stationen.\nZuordnung aufheben und Gebäude löschen?`)) return;
+        if (!(await confirmDialog(`Gebäude enthält noch ${d.areas} Bereiche/Stationen.\nZuordnung aufheben und Gebäude löschen?`, { danger: true }))) return;
         await api.delete(`/buildings/${id}?force=true`);
         refresh();
       } else {

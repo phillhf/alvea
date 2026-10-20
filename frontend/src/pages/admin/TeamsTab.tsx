@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { api } from "../../api/client";
 import { RowActions, EditModal } from "./shared";
+import { confirmDialog } from "../../components/Dialog";
 
 function TeamsTab() {
   const [items, setItems] = useState<any[]>([]);
@@ -33,7 +34,7 @@ function TeamsTab() {
     refresh();
   }
   async function remove(id: string, n: string) {
-    if (!confirm(`Team „${n}" löschen?`)) return;
+    if (!(await confirmDialog(`Team „${n}" löschen?`, { danger: true }))) return;
     await api.delete(`/teams/${id}`);
     refresh();
   }

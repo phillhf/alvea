@@ -26,7 +26,7 @@ export interface LoginThemeConfig {
 }
 
 export const APP_DEFAULTS: ThemeConfig = {
-  primaryColor: "#0d9488",
+  primaryColor: "#0078D4",
   fontBody: "Plus Jakarta Sans",
   fontDisplay: "Bricolage Grotesque",
   bgImage: "",
@@ -35,12 +35,12 @@ export const APP_DEFAULTS: ThemeConfig = {
 };
 
 export const LOGIN_DEFAULTS: LoginThemeConfig = {
-  primaryColor: "#0d9488",
+  primaryColor: "#0078D4",
   bgImage: "",
   bgOpacity: 0.15,
-  panelColor: "#0f766e",
+  panelColor: "#005A9E",
   panelHeadline: "Sauberkeit.\nOrganisiert.",
-  panelSubtext: "Digitale Verwaltung der Bettenaufbereitung und Entlassreinigung – schnell, übersichtlich und zuverlässig.",
+  panelSubtext: "Digitale Krankenhaus-Logistik – schnell, übersichtlich und zuverlässig.",
   panelFeature1: "🛏️ Bettenaufbereitung & Desinfektion",
   panelFeature2: "🧹 Zimmerreinigung & Schlussdesinfektion",
   panelFeature3: "📊 Berichte & Auswertungen",
@@ -49,24 +49,48 @@ export const LOGIN_DEFAULTS: LoginThemeConfig = {
 };
 
 /* ── Font presets ── */
-export const FONT_PAIRS = [
+// Alle Schriften werden lokal mitgeliefert (@fontsource) und erst bei Auswahl
+// nachgeladen – keine Verbindung zu Google Fonts (Datenschutz, CSP, Offline-LAN).
+// Das Standardpaar ist bereits in main.tsx eingebunden.
+export const FONT_PAIRS: { label: string; body: string; display: string; load: () => Promise<unknown> }[] = [
   { label: "Jakarta + Bricolage (Standard)", body: "Plus Jakarta Sans", display: "Bricolage Grotesque",
-    googleUrl: "family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800" },
+    load: () => Promise.resolve() },
   { label: "DM Sans + Syne", body: "DM Sans", display: "Syne",
-    googleUrl: "family=DM+Sans:wght@400;500;600;700&family=Syne:wght@600;700;800" },
+    load: () => Promise.all([
+      import("@fontsource/dm-sans/400.css"), import("@fontsource/dm-sans/500.css"),
+      import("@fontsource/dm-sans/600.css"), import("@fontsource/dm-sans/700.css"),
+      import("@fontsource/syne/600.css"), import("@fontsource/syne/700.css"), import("@fontsource/syne/800.css"),
+    ]) },
   { label: "Nunito + Righteous", body: "Nunito", display: "Righteous",
-    googleUrl: "family=Nunito:wght@400;500;600;700&family=Righteous" },
+    load: () => Promise.all([
+      import("@fontsource/nunito/400.css"), import("@fontsource/nunito/500.css"),
+      import("@fontsource/nunito/600.css"), import("@fontsource/nunito/700.css"),
+      import("@fontsource/righteous/400.css"),
+    ]) },
   { label: "Poppins + Montserrat", body: "Poppins", display: "Montserrat",
-    googleUrl: "family=Poppins:wght@400;500;600;700&family=Montserrat:wght@600;700;800" },
+    load: () => Promise.all([
+      import("@fontsource/poppins/400.css"), import("@fontsource/poppins/500.css"),
+      import("@fontsource/poppins/600.css"), import("@fontsource/poppins/700.css"),
+      import("@fontsource/montserrat/600.css"), import("@fontsource/montserrat/700.css"), import("@fontsource/montserrat/800.css"),
+    ]) },
   { label: "IBM Plex Sans + Outfit", body: "IBM Plex Sans", display: "Outfit",
-    googleUrl: "family=IBM+Plex+Sans:wght@400;500;600;700&family=Outfit:wght@600;700;800" },
+    load: () => Promise.all([
+      import("@fontsource/ibm-plex-sans/400.css"), import("@fontsource/ibm-plex-sans/500.css"),
+      import("@fontsource/ibm-plex-sans/600.css"), import("@fontsource/ibm-plex-sans/700.css"),
+      import("@fontsource/outfit/600.css"), import("@fontsource/outfit/700.css"), import("@fontsource/outfit/800.css"),
+    ]) },
   { label: "Inter + Space Grotesk", body: "Inter", display: "Space Grotesk",
-    googleUrl: "family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700" },
+    load: () => Promise.all([
+      import("@fontsource/inter/400.css"), import("@fontsource/inter/500.css"),
+      import("@fontsource/inter/600.css"), import("@fontsource/inter/700.css"),
+      import("@fontsource/space-grotesk/500.css"), import("@fontsource/space-grotesk/600.css"), import("@fontsource/space-grotesk/700.css"),
+    ]) },
 ];
 
 /* ── Color presets ── */
 export const COLOR_PRESETS = [
-  { label: "Teal (Standard)", value: "#0d9488" },
+  { label: "Fluent-Blau (Standard)", value: "#0078D4" },
+  { label: "Teal",            value: "#0d9488" },
   { label: "Blau",            value: "#2563eb" },
   { label: "Indigo",          value: "#4f46e5" },
   { label: "Violett",         value: "#7c3aed" },
@@ -106,9 +130,7 @@ export function applyAppTheme(cfg: ThemeConfig) {
   r.style.setProperty("--bg-opacity", `${cfg.bgOpacity}`);
 
   const pair = FONT_PAIRS.find(p => p.body === cfg.fontBody) ?? FONT_PAIRS[0];
-  let link = document.getElementById("dynamic-font") as HTMLLinkElement | null;
-  if (!link) { link = document.createElement("link"); link.id = "dynamic-font"; link.rel = "stylesheet"; document.head.appendChild(link); }
-  link.href = `https://fonts.googleapis.com/css2?${pair.googleUrl}&display=swap`;
+  pair.load().catch(() => { /* Fallback: system-ui */ });
 }
 
 /* ── Context ── */

@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { api } from "../../api/client";
 import { RowActions, EditModal } from "./shared";
 import { useRaumbuch } from "../../contexts/RaumbuchContext";
+import { confirmDialog } from "../../components/Dialog";
 
 function AreaTab() {
   const toast = useToast();
@@ -64,13 +65,13 @@ function AreaTab() {
   }
 
   async function remove(id: string, n: string) {
-    if (!confirm(`Bereich/Station „${n}" löschen?`)) return;
+    if (!(await confirmDialog(`Bereich/Station „${n}" löschen?`, { danger: true }))) return;
     try {
       await api.delete(`/areas/${id}`);
     } catch (e: any) {
       if (e.response?.status === 409) {
         const d = e.response.data;
-        if (!confirm(`Enthält noch ${d.rooms} Räume und ${d.active_tasks} aktive Aufträge.\nAlle Daten unwiderruflich löschen?`)) return;
+        if (!(await confirmDialog(`Enthält noch ${d.rooms} Räume und ${d.active_tasks} aktive Aufträge.\nAlle Daten unwiderruflich löschen?`, { danger: true }))) return;
         await api.delete(`/areas/${id}?force=true`);
       } else { toast.error(e.response?.data?.error || "Fehler beim Löschen"); return; }
     }

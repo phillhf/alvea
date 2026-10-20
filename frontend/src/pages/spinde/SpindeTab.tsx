@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { api } from "../../api/client";
+import { confirmDialog } from "../../components/Dialog";
 
 interface Locker {
   id: string; number: string; notes: string | null;
@@ -37,7 +38,7 @@ export default function SpindeTab() {
   }
 
   async function deleteLocker(id: string, num: string) {
-    if (!confirm(`Spind ${num} löschen? Alle Zuweisungen werden ebenfalls gelöscht.`)) return;
+    if (!(await confirmDialog(`Spind ${num} löschen? Alle Zuweisungen werden ebenfalls gelöscht.`, { danger: true }))) return;
     await api.delete(`/lockers/${id}`);
     load();
   }
@@ -67,7 +68,7 @@ export default function SpindeTab() {
   }
 
   async function unassign(l: Locker) {
-    if (!confirm(`Zuweisung für Spind ${l.number} beenden?`)) return;
+    if (!(await confirmDialog(`Zuweisung für Spind ${l.number} beenden?`, { danger: true }))) return;
     await api.delete(`/lockers/${l.id}/assign`);
     load();
   }

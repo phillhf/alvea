@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { api } from "../../api/client";
 import { useToast } from "../../contexts/ToastContext";
 import { BarcodeInput } from "../../components/BarcodeInput";
+import { confirmDialog } from "../../components/Dialog";
 
 interface Flasche { id: string; barcode: string; typ_id: string | null; lager_id: string | null; status: string; typ_name: string | null; lager_name: string | null; house_name: string | null; }
 interface Typ   { id: string; name: string; }
@@ -44,7 +45,7 @@ export default function O2FlaschenTab() {
   }
 
   async function handleDelete(id: string, bc: string) {
-    if (!confirm(`Flasche ${bc} löschen?`)) return;
+    if (!(await confirmDialog(`Flasche ${bc} löschen?`, { danger: true }))) return;
     try { await api.delete(`/o2/flaschen/${id}`); load(); toast.success("Gelöscht."); }
     catch { toast.error("Fehler."); }
   }

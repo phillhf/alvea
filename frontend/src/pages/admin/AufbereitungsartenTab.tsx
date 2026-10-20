@@ -2,6 +2,7 @@ import { useToast } from "../../contexts/ToastContext";
 import { useEffect, useRef, useState } from "react";
 import { api } from "../../api/client";
 import { RowActions, EditModal } from "./shared";
+import { confirmDialog } from "../../components/Dialog";
 
 function DesinfektionsmaßnahmenTab() {
   const toast = useToast();
@@ -42,7 +43,7 @@ function DesinfektionsmaßnahmenTab() {
   }
 
   async function del(id: string) {
-    if (!confirm("Desinfektionsmaßnahme löschen?")) return;
+    if (!(await confirmDialog("Desinfektionsmaßnahme löschen?", { danger: true }))) return;
     setDeleting(id);
     try {
       await api.delete(`/aufbereitungsarten/${id}`);

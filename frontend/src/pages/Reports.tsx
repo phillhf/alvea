@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { api } from "../api/client";
 import { BarcodeInput } from "../components/BarcodeInput";
 import { useAuth } from "../contexts/AuthContext";
+import { alertDialog } from "../components/Dialog";
 
 /* ── helpers ── */
 function fmt(iso: string | null) {
@@ -128,7 +129,7 @@ function StationReport() {
   async function downloadPdf() {
     const url = `${apiBase}/reports/pdf?station_id=${stationId}&date_from=${dateFrom}&date_to=${dateTo}`;
     const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
-    if (!res.ok) { alert("PDF konnte nicht erstellt werden."); return; }
+    if (!res.ok) { alertDialog("PDF konnte nicht erstellt werden."); return; }
     const blob = await res.blob();
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
@@ -266,7 +267,7 @@ function BarcodeReport() {
     if (dateTo)   params.set("date_to",   dateTo);
     const res = await fetch(`${apiBase}/reports/barcode-pdf?${params}`,
       { headers: { Authorization: `Bearer ${token}` } });
-    if (!res.ok) { alert("PDF konnte nicht erstellt werden."); return; }
+    if (!res.ok) { alertDialog("PDF konnte nicht erstellt werden."); return; }
     const blob = await res.blob();
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);

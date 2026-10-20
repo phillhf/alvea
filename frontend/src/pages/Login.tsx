@@ -22,7 +22,7 @@ export default function Login() {
     finally { setLoading(false); }
   }
 
-  const panel  = loginTheme.panelColor  || "#0f766e";
+  const panel  = loginTheme.panelColor  || "#005A9E";
   const accent = loginTheme.primaryColor || theme.primaryColor;
 
   const hasBg = Boolean(loginTheme.bgImage);
@@ -108,15 +108,15 @@ export default function Login() {
               <label className="label">{t("auth.email")}</label>
               <input className="input" type="text" value={email} autoComplete="username"
                      onChange={(e) => setEmail(e.target.value)}
-                     autoFocus required
-                     placeholder="Benutzername" />
+                     autoFocus required inputMode="email" autoCapitalize="none" spellCheck={false}
+                     placeholder="name@beispiel.de" />
             </div>
             <div>
               <label className="label">{t("auth.password")}</label>
               <input className="input" type="password" value={password}
                      onChange={(e) => setPassword(e.target.value)}
                      required autoComplete="current-password"
-                     placeholder="••••••••" />
+                     placeholder="Passwort" />
             </div>
 
             {err && (
