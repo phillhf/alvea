@@ -1,0 +1,438 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── CSS Custom Properties ── */
+:root {
+  --brand-50:  #EFF6FC;
+  --brand-100: #DEECF9;
+  --brand-400: #2B88D8;
+  --brand-500: #0078D4;
+  --brand-600: #106EBE;
+  --brand-700: #005A9E;
+  --brand-800: #004578;
+  --font-body:    'Segoe UI', 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-display: 'Segoe UI', 'Plus Jakarta Sans', system-ui, sans-serif;
+  --bg-image:   none;
+  --bg-opacity: 0.25;
+  --sidebar-w: 72px;
+}
+
+/* Brand-Farb-Utilities via CSS-Variablen (statt statischer Tailwind-Klassen) */
+.bg-brand-50  { background-color: var(--brand-50); }
+.bg-brand-100 { background-color: var(--brand-100); }
+.bg-brand-500 { background-color: var(--brand-500); }
+.bg-brand-600 { background-color: var(--brand-600); }
+.bg-brand-700 { background-color: var(--brand-700); }
+.text-brand-300 { color: color-mix(in srgb, var(--brand-400) 70%, white); }
+.text-brand-600 { color: var(--brand-600); }
+.text-brand-700 { color: var(--brand-700); }
+.ring-brand-500 { --tw-ring-color: var(--brand-500); }
+.hover\:bg-brand-50:hover { background-color: var(--brand-50); }
+.group-hover\:text-brand-700 { color: var(--brand-700); }
+.border-brand-500 { border-color: var(--brand-500); }
+
+@layer base {
+  html { -webkit-tap-highlight-color: transparent; scroll-behavior: smooth; }
+  body {
+    font-family: var(--font-body);
+    background-color: #FAF9F8;
+  }
+  h1, h2, h3 { font-family: var(--font-display); font-weight: 600; letter-spacing: -0.01em; }
+  * { box-sizing: border-box; }
+}
+
+/* ── Hintergrund: flach, keine Blobs (Fluent-Stil) ── */
+body::before {
+  content: "";
+  position: fixed; inset: 0; z-index: 0;
+  background-image: var(--bg-image);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: var(--bg-opacity);
+  pointer-events: none;
+}
+
+body::after { content: none; }
+
+.bg-blob, .bg-blob-1, .bg-blob-2, .bg-blob-3 { display: none; }
+
+#root { position: relative; z-index: 1; }
+
+@layer components {
+  /* ── Buttons (Fluent) ── */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-md px-4 py-2
+           font-semibold text-sm transition-colors duration-100
+           disabled:opacity-40 disabled:cursor-not-allowed select-none
+           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1;
+  }
+  .btn-primary {
+    @apply btn text-white active:scale-[0.98];
+    background-color: var(--brand-500);
+    border: 1px solid var(--brand-500);
+  }
+  .btn-primary:hover {
+    background-color: var(--brand-600);
+    border-color: var(--brand-600);
+  }
+  .btn-primary:focus-visible { outline-color: var(--brand-500); }
+
+  .btn-ghost {
+    @apply btn active:scale-[0.98];
+    background: #ffffff;
+    border: 1px solid #E0E0E0;
+    color: #323130;
+  }
+  .btn-ghost:hover {
+    background: #F3F2F1;
+    border-color: #C8C6C4;
+  }
+
+  .btn-outline {
+    @apply btn active:scale-[0.98];
+    background: #ffffff;
+    color: var(--brand-500);
+    border: 1px solid var(--brand-500);
+  }
+  .btn-outline:hover {
+    background: var(--brand-50);
+  }
+
+  .btn-danger  { @apply btn bg-red-600 text-white hover:bg-red-700 active:scale-[0.98]; }
+  .btn-success { @apply btn bg-emerald-600 text-white hover:bg-emerald-700 active:scale-[0.98]; }
+
+  /* ── Cards (Fluent: weiß, dünner Rand, minimaler Schatten) ── */
+  .card {
+    background: #ffffff;
+    border: 1px solid #E8E8E8;
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    transition: box-shadow 0.1s ease, border-color 0.1s ease;
+  }
+  .card-interactive {
+    @apply card cursor-pointer;
+  }
+  .card-interactive:hover {
+    border-color: #C8C6C4;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  }
+
+  /* Card mit farbigem Top-Akzent */
+  .card-accent {
+    position: relative;
+    overflow: hidden;
+  }
+  .card-accent::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--brand-500);
+  }
+
+  /* ── Form elements (Fluent) ── */
+  .input {
+    @apply w-full rounded-md px-3.5 py-2.5 text-sm outline-none transition-all duration-100 placeholder:text-slate-400;
+    background: #ffffff;
+    border: 1px solid #C8C6C4;
+  }
+  .input:focus {
+    border-color: var(--brand-500);
+    box-shadow: 0 0 0 1px var(--brand-500);
+  }
+  .label {
+    @apply block text-xs font-semibold uppercase tracking-wide text-slate-500 mb-1.5;
+  }
+
+  /* ── Badges (Fluent: tonale Pills) ── */
+  .badge {
+    @apply inline-flex items-center gap-1.5 rounded-md px-2.5 py-1
+           text-xs font-semibold leading-tight;
+  }
+  .badge::before {
+    content: '';
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.65;
+    flex-shrink: 0;
+  }
+  .badge-pill {
+    @apply badge;
+    border-radius: 9999px;
+  }
+  .badge-pill::before { display: none; }
+
+  /* ── Divider ── */
+  .divider { border-top: 1px solid #E8E8E8; }
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.18); border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.3); }
+
+/* ── Sidebar (Fluent: flach, fester Rand) ── */
+.glass-sidebar {
+  background: #ffffff;
+  border-right: 1px solid #E8E8E8;
+}
+
+/* Nav-Item: aktiv mit border-left statt Vollfarbe */
+.sidebar-nav-active {
+  background: var(--brand-50) !important;
+  color: var(--brand-700) !important;
+  border-left: 3px solid var(--brand-500);
+  border-radius: 0 6px 6px 0;
+}
+.sidebar-nav-active .sidebar-nav-icon { color: var(--brand-500); }
+
+/* ── Topbar (Fluent) ── */
+.glass-topbar {
+  background: #ffffff;
+  border-bottom: 1px solid #E8E8E8;
+}
+
+/* ── Druckstil ── */
+@media print {
+  .glass-sidebar, .glass-topbar, .bg-blob { display: none !important; }
+  body::before, body::after { display: none !important; }
+  .card {
+    background: white !important;
+    border: 1px solid #e2e8f0 !important;
+    backdrop-filter: none !important;
+    box-shadow: none !important;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════
+   HIGH CONTRAST MODE
+   Schwarz/Weiß mit gelbem Akzent – WCAG AA konform
+   ══════════════════════════════════════════════════════════ */
+body.high-contrast {
+  background: #000 !important;
+  color: #fff !important;
+}
+
+/* Blobs & Hintergrundbild ausblenden */
+body.high-contrast::before,
+body.high-contrast::after,
+body.high-contrast .bg-blob,
+body.high-contrast [style*="background-image"] { display: none !important; }
+
+/* Alle Texte auf Weiß */
+body.high-contrast *,
+body.high-contrast *::before,
+body.high-contrast *::after {
+  color: #fff !important;
+  border-color: #555 !important;
+  text-shadow: none !important;
+}
+
+/* Karten / Card */
+body.high-contrast .card,
+body.high-contrast [class*="glass"],
+body.high-contrast .glass-sidebar,
+body.high-contrast .glass-topbar {
+  background: #111 !important;
+  border: 1px solid #555 !important;
+  backdrop-filter: none !important;
+  box-shadow: none !important;
+}
+
+/* Trennlinien */
+body.high-contrast .divide-y > * { border-color: #444 !important; }
+body.high-contrast hr { border-color: #444 !important; }
+
+/* Inputs & Selects */
+body.high-contrast .input,
+body.high-contrast input,
+body.high-contrast select,
+body.high-contrast textarea {
+  background: #1a1a1a !important;
+  border: 1px solid #888 !important;
+  color: #fff !important;
+}
+body.high-contrast input::placeholder,
+body.high-contrast textarea::placeholder { color: #aaa !important; }
+body.high-contrast input:focus,
+body.high-contrast select:focus,
+body.high-contrast textarea:focus {
+  outline: 2px solid #facc15 !important;
+  border-color: #facc15 !important;
+}
+
+/* Primärer Button – gelb auf schwarz */
+body.high-contrast .btn-primary,
+body.high-contrast button[class*="btn-primary"] {
+  background: #facc15 !important;
+  color: #000 !important;
+  border: 2px solid #facc15 !important;
+}
+body.high-contrast .btn-primary:hover { background: #fde047 !important; }
+
+/* Outline / Sekundärer Button */
+body.high-contrast .btn-outline,
+body.high-contrast button:not([class*="btn-primary"]):not([class*="bg-"]) {
+  background: #000 !important;
+  color: #fff !important;
+  border: 1px solid #888 !important;
+}
+body.high-contrast button:not([class*="btn-primary"]):hover {
+  background: #1a1a1a !important;
+  border-color: #facc15 !important;
+}
+
+/* Badges & Status-Pills */
+body.high-contrast [class*="bg-green"],
+body.high-contrast [class*="bg-blue"],
+body.high-contrast [class*="bg-orange"],
+body.high-contrast [class*="bg-red"],
+body.high-contrast [class*="bg-yellow"],
+body.high-contrast [class*="bg-teal"],
+body.high-contrast [class*="bg-slate"],
+body.high-contrast [class*="bg-gray"],
+body.high-contrast [class*="bg-indigo"],
+body.high-contrast [class*="bg-purple"],
+body.high-contrast [class*="bg-emerald"],
+body.high-contrast [class*="bg-amber"],
+body.high-contrast [class*="bg-violet"],
+body.high-contrast [class*="bg-zinc"],
+body.high-contrast [class*="bg-white"] {
+  background: #333 !important;
+  color: #fff !important;
+}
+
+/* Kritisch/Dringend in Rot behalten aber lesbar */
+body.high-contrast [class*="bg-red-"]     { background: #7f1d1d !important; }
+body.high-contrast [class*="bg-green-"]   { background: #14532d !important; }
+body.high-contrast [class*="bg-emerald-"] { background: #14532d !important; }
+body.high-contrast [class*="bg-amber-"]   { background: #78350f !important; }
+body.high-contrast [class*="bg-blue-"]    { background: #1e3a5f !important; }
+body.high-contrast [class*="bg-violet-"]  { background: #3b0764 !important; }
+
+/* Inline-Style Hintergründe (glassmorphism, Brand-Farben) → schwarz */
+body.high-contrast [style*="background"],
+body.high-contrast [style*="backgroundColor"] {
+  background: #111 !important;
+}
+
+/* Ausnahme: Buttons mit Inline-Style sollen gelb bleiben */
+body.high-contrast button[style*="background"] {
+  background: #facc15 !important;
+  color: #000 !important;
+}
+
+/* Karten aus den neuen Sektionen (rounded-xl mit Border) */
+body.high-contrast .rounded-xl,
+body.high-contrast .rounded-2xl {
+  background: #111 !important;
+  border-color: #555 !important;
+}
+
+/* Text-Farben normalisieren */
+body.high-contrast [class*="text-emerald"],
+body.high-contrast [class*="text-amber"],
+body.high-contrast [class*="text-violet"],
+body.high-contrast [class*="text-green"],
+body.high-contrast [class*="text-blue"],
+body.high-contrast [class*="text-red"] {
+  color: #fff !important;
+}
+
+/* Selektierte / aktive Tab-Unterstreichung */
+body.high-contrast [class*="border-b-2"]:not([class*="border-transparent"]) {
+  border-color: #facc15 !important;
+  color: #facc15 !important;
+}
+
+/* Links */
+body.high-contrast a { color: #facc15 !important; }
+body.high-contrast a:hover { color: #fde047 !important; }
+
+/* Label */
+body.high-contrast .label { color: #ccc !important; }
+
+/* Scrollbar */
+body.high-contrast ::-webkit-scrollbar { background: #111; }
+body.high-contrast ::-webkit-scrollbar-thumb { background: #555; }
+
+/* ── Skeleton Loader ──────────────────────────────────────────────────────── */
+@keyframes skeleton-shimmer {
+  0%   { background-position: -600px 0; }
+  100% { background-position:  600px 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg, rgba(241,245,249,0.9) 25%, rgba(226,232,240,0.9) 50%, rgba(241,245,249,0.9) 75%);
+  background-size: 1200px 100%;
+  animation: skeleton-shimmer 1.6s infinite linear;
+  border-radius: 6px;
+}
+.skeleton-circle { border-radius: 50%; }
+.skeleton-text   { height: 12px; }
+.skeleton-title  { height: 16px; }
+
+/* ── Typografie-Utilities ─────────────────────────────────────────────────── */
+.text-label {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+.text-mono-num {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+/* ── Stat Card (Dashboard) ────────────────────────────────────────────────── */
+.stat-card {
+  border-radius: 14px;
+  padding: 14px 16px;
+  position: relative;
+  overflow: hidden;
+  color: #fff;
+}
+.stat-card .stat-num  { font-size: 28px; font-weight: 500; font-variant-numeric: tabular-nums; }
+.stat-card .stat-label{ font-size: 10px; letter-spacing: 0.07em; text-transform: uppercase; color: rgba(255,255,255,0.72); margin-bottom: 2px; }
+.stat-card .stat-sub  { font-size: 11px; color: rgba(255,255,255,0.75); margin-top: 6px; }
+.stat-card .stat-icon { position: absolute; top: 12px; right: 14px; font-size: 22px; color: rgba(255,255,255,0.22); }
+.stat-card-blue   { background: #0078D4; }
+.stat-card-teal   { background: #038387; }
+.stat-card-amber  { background: #B85C1E; }
+.stat-card-red    { background: #D13438; }
+.stat-card-violet { background: #5C2D91; }
+.stat-card-green  { background: #107C10; }
+
+/* ── Modal Header (farbig) ────────────────────────────────────────────────── */
+.modal-header-colored {
+  padding: 16px 20px 14px;
+  border-bottom: 0.5px solid rgba(0,0,0,0.06);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.modal-header-blue   { background: #EFF6FC; border-bottom-color: #C7E0F4; }
+.modal-header-green  { background: #E6F4EA; border-bottom-color: #C3E6CB; }
+.modal-header-amber  { background: #FFF4CE; border-bottom-color: #FAD978; }
+.modal-header-red    { background: #FDE7E9; border-bottom-color: #F8C5CA; }
+
+.modal-icon-badge {
+  width: 38px;
+  height: 38px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.modal-icon-blue   { background: #0078D4; color: #fff; }
+.modal-icon-green  { background: #107C10; color: #fff; }
+.modal-icon-amber  { background: #B85C1E; color: #fff; }
+.modal-icon-red    { background: #D13438; color: #fff; }

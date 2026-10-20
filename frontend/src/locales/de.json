@@ -1,0 +1,121 @@
+{
+  "app": "OpenClinic",
+  "auth": {
+    "email": "Benutzername",
+    "password": "Passwort",
+    "login": "Anmelden",
+    "logout": "Abmelden",
+    "invalid": "Ungültige Zugangsdaten"
+  },
+  "nav": {
+    "beds": "Stationsübersicht",
+    "bedsZentral": "Bett-Zentral",
+    "rooms": "Zimmerreinigung",
+    "reports": "Berichte",
+    "admin": "Verwaltung"
+  },
+  "dashboard": {
+    "myAreas": "Meine Bereiche",
+    "noAreas": "Dir ist noch kein Bereich zugewiesen. Bitte bei der Leitung melden.",
+    "noOpen": "Keine offenen Aufträge in diesem Bereich.",
+    "openTasks": "offene Aufträge",
+    "oldestOpen": "Ältester offen seit",
+    "bedsInStation": "Betten in Bearbeitung"
+  },
+  "station": {
+    "open": "offen",
+    "running": "in Arbeit"
+  },
+  "bed": {
+    "status": {
+      "frei": "Frei",
+      "belegt": "Belegt",
+      "angefordert": "Angefordert",
+      "in_bearbeitung": "In Bearbeitung",
+      "bereit": "Bereit"
+    },
+    "requestCleaning": "Reinigung anfordern",
+    "number": "Bett"
+  },
+  "task": {
+    "category": {
+      "bed_cleaning": "Bettenaufbereitung",
+      "room_cleaning": "Zimmerreinigung"
+    },
+    "cleaningType": {
+      "normal": "Normale Bettenreinigung",
+      "infektioes": "Infektiöse Bettenreinigung",
+      "standard": "Standardreinigung",
+      "schlussdesinfektion": "Schlussdesinfektion",
+      "aufbereitung_zentral": "Zentrale Aufbereitung"
+    },
+    "status": {
+      "offen": "Offen",
+      "laufend": "In Arbeit",
+      "abgeschlossen": "Abgeschlossen",
+      "abgenommen": "Abgenommen",
+      "abgelehnt": "Abgelehnt",
+      "unterwegs": "Auf dem Weg",
+      "angekommen": "Angekommen"
+    },
+    "priority": {
+      "1": "Hoch",
+      "2": "Normal",
+      "3": "Niedrig"
+    },
+    "pathogens": "Krankheitserreger",
+    "selectPathogens": "Krankheitserreger auswählen",
+    "claim": "Auftrag annehmen",
+    "release": "Auftrag zurückgeben",
+    "start": "Starten",
+    "complete": "Abschließen",
+    "notes": "Notizen",
+    "photos": "Fotos",
+    "upload": "Foto hochladen",
+    "signOff": "Abnehmen",
+    "reject": "Ablehnen",
+    "pin": "Abnahme-PIN",
+    "comment": "Kommentar",
+    "checklist": "Checkliste",
+    "requestedBy": "Angefordert von",
+    "assignedTo": "Bearbeitet von",
+    "noneAssigned": "— frei —",
+    "createdAgo": "Im System seit",
+    "newBedTask": "Bettenaufbereitung anlegen",
+    "newRoomTask": "Zimmerreinigung anlegen",
+    "newZentralTask": "Zentral-Auftrag anlegen",
+    "isIso": "ISO-Bett",
+    "enRoute": "Auf dem Weg zur Station",
+    "arrived": "Auf der Station angekommen",
+    "takeover": "Auftrag im Zimmer annehmen",
+    "done": "Auftrag als erledigt melden"
+  },
+  "admin": {
+    "users": "Benutzer",
+    "houses": "Häuser",
+    "areas": "Bereiche",
+    "stations": "Stationen",
+    "rooms": "Zimmer",
+    "beds": "Betten",
+    "userAreas": "Bereichszuordnung",
+    "fullName": "Name",
+    "role": "Rolle",
+    "active": "Aktiv",
+    "create": "Anlegen",
+    "barcodes": "Strichcodes",
+    "instructions": "Aufbereitungsanleitungen",
+    "pathogens": "Krankheitserreger"
+  },
+  "common": {
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "loading": "Lade…",
+    "error": "Fehler",
+    "yes": "Ja",
+    "no": "Nein",
+    "language": "Sprache",
+    "back": "Zurück",
+    "minutes": "Min.",
+    "hours": "Std."
+  }
+}

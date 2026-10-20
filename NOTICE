@@ -1,0 +1,60 @@
+Betten & Entlassreinigung
+Copyright (c) 2026 Betten & Entlassreinigung Contributors
+
+This product includes software developed by third parties.
+
+The following components are used under the Apache License, Version 2.0
+(https://www.apache.org/licenses/LICENSE-2.0):
+
+  TypeScript
+  Copyright (c) Microsoft Corporation
+  https://github.com/microsoft/TypeScript
+
+  @zxing/browser
+  Copyright (c) ZXing Authors
+  https://github.com/zxing-js/browser
+
+  @zxing/library
+  Copyright (c) ZXing Authors
+  https://github.com/zxing-js/library
+
+The following components are used under the MIT License
+(https://opensource.org/licenses/MIT):
+
+  Express           – https://github.com/expressjs/express
+  cors              – https://github.com/expressjs/cors
+  React             – https://github.com/facebook/react
+  React Router      – https://github.com/remix-run/react-router
+  Tailwind CSS      – https://github.com/tailwindlabs/tailwindcss
+  PostCSS           – https://github.com/postcss/postcss
+  Autoprefixer      – https://github.com/postcss/autoprefixer
+  Vite              – https://github.com/vitejs/vite
+  Axios             – https://github.com/axios/axios
+  Zod               – https://github.com/colinhacks/zod
+  bcryptjs          – https://github.com/dcodeIO/bcrypt.js
+  better-sqlite3    – https://github.com/WiseLibs/better-sqlite3
+  jsonwebtoken      – https://github.com/auth0/node-jsonwebtoken
+  multer            – https://github.com/expressjs/multer
+  PDFKit            – https://github.com/foliojs/pdfkit
+  ExcelJS           – https://github.com/exceljs/exceljs
+  helmet            – https://github.com/helmetjs/helmet
+  express-rate-limit – https://github.com/nfriedly/express-rate-limit
+  i18next           – https://github.com/i18next/i18next
+  i18next-browser-languagedetector – https://github.com/i18next/i18next-browser-languageDetector
+  Jest              – https://github.com/jestjs/jest
+
+The following components are used under the SIL Open Font License 1.1
+(https://scripts.sil.org/OFL):
+
+  Plus Jakarta Sans
+  Copyright (c) 2020 Tokotype (@tokotype)
+  https://github.com/tokotype/PlusJakartaSans
+
+  Bricolage Grotesque
+  Copyright (c) 2023 The Bricolage Grotesque Project Authors
+  https://github.com/ateliertriangle/bricolage-grotesque
+
+The following components are used under the BSD 2-Clause License
+(https://opensource.org/licenses/BSD-2-Clause):
+
+  dotenv            – https://github.com/motdotla/dotenv

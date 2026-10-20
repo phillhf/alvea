@@ -1,0 +1,16 @@
+# Standard: LF im Repository
+* text=auto eol=lf
+
+# Windows-Skripte brauchen CRLF (CMD bricht sonst lautlos ab)
+*.bat  text eol=crlf
+*.cmd  text eol=crlf
+*.ps1  text eol=crlf
+*.iss  text eol=crlf
+
+# Binaerdateien
+*.pdf   binary
+*.png   binary
+*.jpg   binary
+*.ico   binary
+*.woff2 binary
+*.exe   binary

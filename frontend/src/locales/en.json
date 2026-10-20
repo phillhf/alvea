@@ -1,0 +1,43 @@
+{
+  "app": "Bed & Discharge Cleaning",
+  "auth": { "email":"Username","password":"Password","login":"Sign in","logout":"Sign out","invalid":"Invalid credentials" },
+  "nav": { "beds":"Bed Reprocessing","rooms":"Room Cleaning","reports":"Reports","admin":"Admin" },
+  "dashboard": {
+    "myAreas":"My Areas","noAreas":"No area assigned yet. Please contact your supervisor.",
+    "noOpen":"No open tasks in this area.",
+    "openTasks":"open tasks","oldestOpen":"Oldest open since","bedsInStation":"Beds in progress"
+  },
+  "station": { "open":"open","running":"running" },
+  "bed": {
+    "status": { "frei":"Free","belegt":"Occupied","angefordert":"Requested","in_bearbeitung":"In progress","bereit":"Ready" },
+    "requestCleaning":"Request cleaning","number":"Bed"
+  },
+  "task": {
+    "category": { "bed_cleaning":"Bed reprocessing","room_cleaning":"Room cleaning" },
+    "cleaningType": {
+      "normal":"Standard bed cleaning","infektioes":"Infectious bed cleaning",
+      "standard":"Standard room cleaning","schlussdesinfektion":"Final disinfection"
+    },
+    "status": {
+      "offen":"Open","laufend":"In progress","abgeschlossen":"Completed",
+      "abgenommen":"Approved","abgelehnt":"Rejected"
+    },
+    "priority": { "1":"High","2":"Normal","3":"Low" },
+    "pathogens":"Pathogens","selectPathogens":"Select pathogens",
+    "claim":"Claim task","release":"Release","start":"Start","complete":"Finish",
+    "notes":"Notes","photos":"Photos","upload":"Upload photo",
+    "signOff":"Approve","reject":"Reject","pin":"Approval PIN","comment":"Comment",
+    "checklist":"Checklist","requestedBy":"Requested by","assignedTo":"Assigned to",
+    "noneAssigned":"— free —","createdAgo":"In system since",
+    "newBedTask":"New bed reprocessing","newRoomTask":"New room cleaning"
+  },
+  "admin": {
+    "users":"Users","houses":"Houses","areas":"Areas","stations":"Stations",
+    "rooms":"Rooms","beds":"Beds","userAreas":"Area assignments",
+    "fullName":"Name","role":"Role","active":"Active","create":"Create"
+  },
+  "common": {
+    "save":"Save","cancel":"Cancel","loading":"Loading…","error":"Error",
+    "yes":"Yes","no":"No","language":"Language","back":"Back","minutes":"min","hours":"h"
+  }
+}
