@@ -5,6 +5,7 @@ import { AuthedRequest } from "../types";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
+import { UPLOAD_DIR } from "../config/paths";
 
 const router = Router();
 router.use(authRequired);
@@ -14,7 +15,7 @@ const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif
 
 const bgStorage = multer.diskStorage({
   destination: (_req, _file, cb) => {
-    const dir = path.join(__dirname, "../../uploads/bg");
+    const dir = path.join(UPLOAD_DIR, "bg");
     fs.mkdirSync(dir, { recursive: true });
     cb(null, dir);
   },

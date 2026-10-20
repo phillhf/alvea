@@ -1,5 +1,5 @@
 {
-  "app": "Bed & Discharge Cleaning",
+  "app": "Alvea",
   "auth": { "email":"Username","password":"Password","login":"Sign in","logout":"Sign out","invalid":"Invalid credentials" },
   "nav": { "beds":"Bed Reprocessing","rooms":"Room Cleaning","reports":"Reports","admin":"Admin" },
   "dashboard": {

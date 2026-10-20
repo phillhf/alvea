@@ -1,4 +1,4 @@
-# Docker-Betrieb – OpenClinic
+# Docker-Betrieb – Alvea
 
 Diese Anleitung beschreibt den Betrieb als Docker-Container (Alternative zum Windows-Server-Deployment mit NSSM).
 
@@ -22,7 +22,7 @@ Diese Anleitung beschreibt den Betrieb als Docker-Container (Alternative zum Win
    docker compose up -d --build
    ```
 
-3. Aufrufen unter `http://<server-ip>:37843`. Login mit `admin@openclinic.local` / `admin123` – Passwort sofort ändern.
+3. Aufrufen unter `http://<server-ip>:37843`. Login mit `admin@alvea.local` / `admin123` – Passwort sofort ändern.
 
 ## Daten & Persistenz
 

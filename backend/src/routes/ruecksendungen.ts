@@ -8,12 +8,12 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 import PDFDocument from "pdfkit";
+import { UPLOAD_DIR } from "../config/paths";
 
 const router = Router();
 router.use(authRequired);
 
 // ── Upload ────────────────────────────────────────────────────────────────────
-const UPLOAD_DIR = process.env.UPLOAD_DIR || "./uploads";
 fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 
 const ALLOWED_TYPES = ["image/jpeg","image/png","image/webp","image/heic","application/pdf"];

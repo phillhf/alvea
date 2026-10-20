@@ -8,12 +8,12 @@ import { authRequired, requirePermission } from "../middleware/auth";
 import { AuthedRequest } from "../types";
 import { audit } from "../services/audit";
 import { getAreaScope, getStationScope } from "../services/scope";
+import { UPLOAD_DIR } from "../config/paths";
 
 const router = Router();
 router.use(authRequired);
 
 // ---------- Uploads ----------
-const UPLOAD_DIR = process.env.UPLOAD_DIR || "./uploads";
 fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 

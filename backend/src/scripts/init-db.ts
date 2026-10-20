@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import fs from "fs";
 import path from "path";
 import { db, query, newId, migrate, ensureWaesche } from "../config/db";
+import { ALL_PERMISSIONS } from "../types";
 
 async function main() {
   console.log("📦 Schema anlegen und migrieren...");
@@ -144,12 +145,7 @@ async function main() {
   });
 
   // ── Admin-Rolle sicherstellen ──────────────────────────────────────────────
-  const allPerms = [
-    "bettenaufbereitung","bettenaufbereitung_zentral","zimmerreinigung","berichte",
-    "auftraege_erstellen","dashboard","sauerstofftransport","lager","betten_reparatur",
-    "stationspersonal","bettenstamm","betten_pw","meldungen","raumbuch",
-    "benutzerverwaltung","spindverwaltung","waesche","chat","verwaltung"
-  ];
+  const allPerms = ALL_PERMISSIONS;
   let adminRoleId = (query<any>(`SELECT id FROM roles WHERE name='Administrator' LIMIT 1`).rows[0] as any)?.id;
   if (!adminRoleId) {
     adminRoleId = newId();
@@ -160,22 +156,21 @@ async function main() {
   }
 
   // ── Admin-Nutzer ───────────────────────────────────────────────────────────
-  // Prüft beide möglichen Login-Domains: neue Installationen bekommen
-  // @openclinic.local, bestehende Installationen (vor der Umbenennung) behalten
-  // ihre bisherige Adresse @bettenaufbereitung.local, damit beim Update kein
-  // doppelter Admin-Account entsteht.
+  // Prüft alle bisherigen Login-Domains: neue Installationen bekommen
+  // @alvea.local, bestehende Installationen (vor den Umbenennungen) behalten
+  // ihre bisherige Adresse, damit beim Update kein doppelter Admin entsteht.
   const existingAdmin = query<any>(
-    `SELECT id, email FROM users WHERE email IN ('admin@openclinic.local','admin@bettenaufbereitung.local') LIMIT 1`
+    `SELECT id, email FROM users WHERE email IN ('admin@alvea.local','admin@openclinic.local','admin@bettenaufbereitung.local') LIMIT 1`
   ).rows[0];
   if (!existingAdmin) {
     const hash = await bcrypt.hash("admin123", 10);
     const pin  = await bcrypt.hash("1234", 10);
     query(
       `INSERT INTO users (id,email,password_hash,pin_hash,full_name,active,role_id)
-       VALUES ($1,'admin@openclinic.local',$2,$3,'Administrator',1,$4)`,
+       VALUES ($1,'admin@alvea.local',$2,$3,'Administrator',1,$4)`,
       [newId(), hash, pin, adminRoleId]
     );
-    console.log("   Login: admin@openclinic.local / admin123");
+    console.log("   Login: admin@alvea.local / admin123");
   } else {
     query(`UPDATE users SET role_id=$1, active=1 WHERE id=$2`, [adminRoleId, existingAdmin.id]);
     console.log("   Admin-User bereits vorhanden – Rolle aktualisiert.");

@@ -23,3 +23,6 @@ Update/
 # Persoenliche Projektnotizen (nicht veroeffentlichen)
 PROJEKT_SNAPSHOT*.md
 *.tsbuildinfo
+
+# Installer-Build
+installer/build/

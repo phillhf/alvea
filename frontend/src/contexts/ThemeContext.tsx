@@ -31,7 +31,7 @@ export const APP_DEFAULTS: ThemeConfig = {
   fontDisplay: "Bricolage Grotesque",
   bgImage: "",
   bgOpacity: 0.12,
-  appName: "OpenClinic",
+  appName: "Alvea",
 };
 
 export const LOGIN_DEFAULTS: LoginThemeConfig = {

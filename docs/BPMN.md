@@ -1,4 +1,4 @@
-# Prozessdiagramme – OpenClinic
+# Prozessdiagramme – Alvea
 
 ## Hierarchie-Modell
 

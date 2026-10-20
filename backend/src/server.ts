@@ -27,6 +27,8 @@ import { query, migrate, ensureWaesche } from "./config/db";
 import { logger } from "./services/logger";
 import { requestLogger } from "./middleware/requestLogger";
 import { authRequired } from "./middleware/auth";
+import { UPLOAD_DIR, FRONTEND_DIST, LOG_DIR, APP_VERSION } from "./config/paths";
+import systemRouter from "./routes/system";
 
 // Migrationen + Modul-Setup vor allen Routes
 migrate();
@@ -124,7 +126,6 @@ app.use("/api/auth/login",       loginLimiter);
 app.use("/api/users/me/password", passwordLimiter);
 app.use("/api",                   apiLimiter);
 
-const UPLOAD_DIR = process.env.UPLOAD_DIR || path.resolve(__dirname, "../../uploads");
 fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 // Uploads: Fotos (Patientendaten) nur mit Auth
 app.use("/api/uploads", authRequired, express.static(UPLOAD_DIR));
@@ -148,7 +149,7 @@ app.get("/api/theme", (_req, res) => {
 });
 
 app.get("/api/health", (_req, res) =>
-  res.json({ ok: true, service: "openclinic", ts: new Date().toISOString() })
+  res.json({ ok: true, service: "alvea", version: APP_VERSION, ts: new Date().toISOString() })
 );
 app.use("/api/auth",       authRoutes);
 app.use("/api/users",      userRoutes);
@@ -183,9 +184,9 @@ app.use("/api/announcements",    announcementsRouter);
 app.use("/api/import",             importRouter);
 app.use("/api/lockers",            lockerRouter);
 app.use("/api/room-types",         roomTypesRouter);
+app.use("/api/system",             systemRouter);
 
 // ---------- SPA ----------
-const FRONTEND_DIST = path.resolve(__dirname, "../../frontend/dist");
 if (fs.existsSync(FRONTEND_DIST)) {
   app.use(express.static(FRONTEND_DIST));
   app.get(/^(?!\/api).*/, (_req, res) => {
@@ -220,7 +221,7 @@ app.listen(PORT, HOST, () => {
   const addrs = getLanAddresses();
 
   // Lesbarer Startbanner in der Konsole (Breite dynamisch berechnet)
-  const bannerText = "OpenClinic  ·  läuft";
+  const bannerText = `Alvea ${APP_VERSION}  ·  läuft`;
   const innerWidth = bannerText.length + 4; // 2 Leerzeichen Rand links + rechts
   const pad = Math.floor((innerWidth - bannerText.length) / 2);
   const bannerLine = " ".repeat(pad) + bannerText + " ".repeat(innerWidth - bannerText.length - pad);
@@ -232,7 +233,7 @@ app.listen(PORT, HOST, () => {
   console.log(`   Lokal:  http://localhost:${PORT}`);
   addrs.forEach(ip => console.log(`   LAN:    http://${ip}:${PORT}`));
   console.log("");
-  console.log("   Logs:   ../logs/app.log");
+  console.log(`   Logs:   ${path.join(LOG_DIR, "app.log")}`);
   console.log("");
 
   // In die Log-Datei schreiben (JSON, nur Datei)

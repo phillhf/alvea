@@ -4,6 +4,7 @@ import path from "path";
 import fs from "fs";
 import { query } from "../config/db";
 import { logger } from "./logger";
+import { DB_FILE } from "../config/paths";
 
 const ALGORITHM = "aes-256-gcm";
 
@@ -68,11 +69,7 @@ export function runBackup(): { success: boolean; message: string } {
     return { success: false, message: "Kein Backup-Pfad konfiguriert." };
   }
 
-  const dbFile = process.env.DB_FILE || "./data/openclinic.sqlite";
-  // Resolve relative to backend dist (where server runs from)
-  const resolvedDb = path.isAbsolute(dbFile)
-    ? dbFile
-    : path.resolve(process.cwd(), dbFile);
+  const resolvedDb = DB_FILE;
 
   if (!fs.existsSync(resolvedDb)) {
     return { success: false, message: `Datenbankdatei nicht gefunden: ${resolvedDb}` };
@@ -80,7 +77,7 @@ export function runBackup(): { success: boolean; message: string } {
 
   const now = new Date();
   const ts  = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}-${String(now.getDate()).padStart(2,"0")}_${String(now.getHours()).padStart(2,"0")}-${String(now.getMinutes()).padStart(2,"0")}`;
-  const destFileName = `openclinic-${ts}.sqlite`;
+  const destFileName = `alvea-${ts}.sqlite`;
 
   // Network share: mount with net use, copy, unmount
   const isUncPath = backupPath.startsWith("\\\\") || backupPath.startsWith("//");

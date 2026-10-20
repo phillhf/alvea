@@ -9,7 +9,7 @@ export default function Login() {
   const { login } = useAuth();
   const { theme, loginTheme } = useTheme();
   const nav = useNavigate();
-  const [email, setEmail] = useState("admin@openclinic.local");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [err, setErr] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);

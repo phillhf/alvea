@@ -1,7 +1,7 @@
 {
-  "name": "OpenClinic",
-  "short_name": "Bettenreinigung",
-  "description": "Digitale Verwaltung von Bettenaufbereitung und Entlassreinigung",
+  "name": "Alvea",
+  "short_name": "Alvea",
+  "description": "Digitale Krankenhaus-Logistik: Bettenaufbereitung, Reinigung, Sauerstoff, Lager und mehr",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#f8fafc",

@@ -1,5 +1,5 @@
-Betten & Entlassreinigung
-Copyright (c) 2026 Betten & Entlassreinigung Contributors
+Alvea
+Copyright (c) 2026 Alvea Contributors
 
 This product includes software developed by third parties.
 
@@ -42,6 +42,14 @@ The following components are used under the MIT License
   i18next           – https://github.com/i18next/i18next
   i18next-browser-languagedetector – https://github.com/i18next/i18next-browser-languageDetector
   Jest              – https://github.com/jestjs/jest
+  Pino              – https://github.com/pinojs/pino
+  node-cron         – https://github.com/node-cron/node-cron
+
+The Windows installer additionally bundles (MIT License):
+
+  Node.js           – https://github.com/nodejs/node
+                      (license text: node\LICENSE.txt in the installation folder)
+  WinSW             – https://github.com/winsw/winsw
 
 The following components are used under the SIL Open Font License 1.1
 (https://scripts.sil.org/OFL):

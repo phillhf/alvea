@@ -1,0 +1,25 @@
+<!--
+  Windows-Dienst "Alvea" (WinSW). %BASE% = Ordner dieser Datei ({app}\service).
+  Konfiguration (Port, Pfade, Secret) steht in {app}\data\alvea.env.
+-->
+<service>
+  <id>Alvea</id>
+  <name>Alvea</name>
+  <description>Alvea - Webserver fuer Bettenaufbereitung, Reinigung und Krankenhaus-Logistik</description>
+  <executable>%BASE%\..\node\node.exe</executable>
+  <arguments>"%BASE%\..\app\backend\dist\server.js"</arguments>
+  <workingdirectory>%BASE%\..\app\backend</workingdirectory>
+  <env name="DOTENV_CONFIG_PATH" value="%BASE%\..\data\alvea.env"/>
+  <env name="NODE_ENV" value="production"/>
+  <startmode>Automatic</startmode>
+  <stoptimeout>15 sec</stoptimeout>
+  <onfailure action="restart" delay="10 sec"/>
+  <onfailure action="restart" delay="30 sec"/>
+  <onfailure action="restart" delay="60 sec"/>
+  <resetfailure>1 hour</resetfailure>
+  <logpath>%BASE%\..\data\logs</logpath>
+  <log mode="roll-by-size">
+    <sizeThreshold>10240</sizeThreshold>
+    <keepFiles>5</keepFiles>
+  </log>
+</service>

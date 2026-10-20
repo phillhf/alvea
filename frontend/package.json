@@ -1,6 +1,6 @@
 {
-  "name": "openclinic-frontend",
-  "version": "0.9.2",
+  "name": "alvea-frontend",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
   "scripts": {

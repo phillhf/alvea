@@ -1,7 +1,7 @@
 import path from "path";
 import fs from "fs";
 
-const LOG_DIR  = process.env.LOG_DIR  || path.resolve(__dirname, "../../../logs");
+import { LOG_DIR } from "../config/paths";
 const LOG_LEVEL = process.env.LOG_LEVEL || (process.env.NODE_ENV === "production" ? "info" : "debug");
 
 fs.mkdirSync(LOG_DIR, { recursive: true });

@@ -68,7 +68,7 @@ function DesignTab() {
             className="input"
             value={draft.appName}
             onChange={(e) => setDraft((d) => ({ ...d, appName: e.target.value }))}
-            placeholder="OpenClinic"
+            placeholder="Alvea"
           />
         </div>
       </div>

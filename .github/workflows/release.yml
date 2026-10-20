@@ -1,0 +1,64 @@
+name: Release
+
+# Ein Tag "vX.Y.Z" baut das Setup und veroeffentlicht es als GitHub-Release.
+# Die Update-Funktion der installierten Server holt sich genau diese Dateien:
+#   Alvea-Setup-X.Y.Z.exe + Alvea-Setup-X.Y.Z.exe.sha256
+on:
+  push:
+    tags: ["v*.*.*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Inno Setup installieren
+        shell: pwsh
+        run: |
+          $tag = gh release view --repo jrsoftware/issrc --json tagName -q .tagName
+          $asset = gh release view $tag --repo jrsoftware/issrc --json assets -q '.assets[].name' | Where-Object { $_ -match '^innosetup-.*-x64\.exe$' } | Select-Object -First 1
+          gh release download $tag --repo jrsoftware/issrc -p $asset -D $env:RUNNER_TEMP
+          $sig = Get-AuthenticodeSignature (Join-Path $env:RUNNER_TEMP $asset)
+          if ($sig.Status -ne 'Valid') { throw "Signatur von $asset ungueltig: $($sig.Status)" }
+          $dir = Join-Path $env:GITHUB_WORKSPACE "installer\build\tools\innosetup"
+          $p = Start-Process (Join-Path $env:RUNNER_TEMP $asset) -ArgumentList '/VERYSILENT','/SUPPRESSMSGBOXES','/CURRENTUSER','/PORTABLE=1','/NOICONS',"/DIR=`"$dir`"" -Wait -PassThru
+          if ($p.ExitCode -ne 0) { throw "Inno Setup Installation fehlgeschlagen ($($p.ExitCode))" }
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Setup bauen
+        shell: pwsh
+        run: ./installer/build.ps1 -ExpectedVersion "${{ github.ref_name }}"
+
+      - name: Release-Notizen aus CHANGELOG
+        shell: pwsh
+        run: |
+          $version = "${{ github.ref_name }}" -replace '^v', ''
+          $lines = Get-Content CHANGELOG.md -Encoding UTF8
+          $start = ($lines | Select-String -Pattern "^## \[$([regex]::Escape($version))\]" | Select-Object -First 1).LineNumber
+          if (-not $start) { throw "Kein CHANGELOG-Eintrag fuer $version" }
+          $notes = @()
+          for ($i = $start; $i -lt $lines.Count; $i++) {
+            if ($lines[$i] -match '^## \[') { break }
+            $notes += $lines[$i]
+          }
+          ($notes -join "`n").Trim() -replace '(?s)\n---\s*$', '' | Set-Content release-notes.md -Encoding UTF8
+
+      - name: GitHub-Release veroeffentlichen
+        shell: pwsh
+        run: |
+          $version = "${{ github.ref_name }}" -replace '^v', ''
+          gh release create "${{ github.ref_name }}" `
+            "installer/build/output/Alvea-Setup-$version.exe" `
+            "installer/build/output/Alvea-Setup-$version.exe.sha256" `
+            --title "Alvea $version" --notes-file release-notes.md
+        env:
+          GH_TOKEN: ${{ github.token }}

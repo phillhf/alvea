@@ -1,7 +1,47 @@
 # Changelog
 
 Alle wichtigen Änderungen an diesem Projekt werden hier dokumentiert.
-Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
+Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/), Versionen folgen [Semantic Versioning](https://semver.org/lang/de/).
+
+## [1.0.0] - 2026-10-20
+Erste öffentliche Version unter dem neuen Namen **Alvea** (vorher *OpenClinic*, davor *Betten & Entlassreinigung*).
+
+### Neu
+- **Windows-Installer** (`Alvea-Setup-x.y.z.exe`): Assistent mit Installationsordner, Port, Firewall-Freigabe und Übernahme einer bestehenden OpenClinic-Installation. Node.js-Laufzeit ist enthalten, auf dem Server muss nichts vorinstalliert sein. Alvea läuft als Windows-Dienst „Alvea“.
+- **Update über GitHub-Releases**: neuer Tab *Verwaltung → ⬆️ Update* zeigt installierte und neueste Version mit Änderungen und aktualisiert per Knopfdruck. Alternativ Startmenü → *Nach Updates suchen*. Downloads werden per SHA256 geprüft, die Datenbank wird vor jedem Update gesichert.
+- `/api/health` liefert die installierte Version.
+
+### Geändert
+- Umbenennung in **Alvea** (App-Name, Titel, Manifest, Dienst, Standard-Login `admin@alvea.local`). Bestehende Logins (`admin@openclinic.local`, `admin@bettenaufbereitung.local`) gelten weiter.
+- Daten (Datenbank, Uploads, Logs, Backups, Konfiguration) liegen bei Installation per Setup gesammelt in `data\` und werden von Updates nie angefasst.
+- Alle Datenpfade werden zentral aus der Konfiguration gelesen. Hintergrundbilder landeten vorher unabhängig von `UPLOAD_DIR` immer im Programmordner.
+- Login-Feld ist nicht mehr mit der Admin-Adresse vorbelegt.
+- Alte Installations-/Update-Skripte (`install.bat`, `start.bat`, `update.bat`, `Update\`) entfernt – ersetzt durch Setup und Updater.
+
+### Behoben
+- `init-db` setzte die Administrator-Rolle auf eine veraltete Berechtigungsliste zurück (Raumbuchungs-Berechtigungen fehlten). Jetzt werden immer alle Berechtigungen vergeben.
+- `backend/package-lock.json` passte nicht mehr zu `package.json` (`npm ci` schlug fehl).
+- Platzhalter-Schriftdateien ohne Inhalt in `frontend/public/fonts` entfernt (Schriften kommen aus `@fontsource`).
+
+---
+
+## [0.9.2] - 2026-07-09
+### Neu
+- **Raumbuchung**: Gemeinsam genutzte Räume und Arbeitsplätze buchen, Agenda-Ansicht, Ausstattung je Arbeitsplatz, Favoriten (Migrationen v41–v45)
+- **Stellvertretende Buchung**: explizite Zuordnung, wer für wen buchen darf (Berechtigungen `raumbuchung`, `raumbuchung_stellvertretung`, `raumbuchungsadmin`)
+- **Gebäude-Ebene im Raumbuch**: Haus → Gebäude → Station/Bereich → Raum → Stellplatz (Migration v39), Excel-Import mit Feld `gebaeude` und `stellplatz_anzahl`
+- **Rücksendungen überarbeitet**: direkter Lager-Workflow ohne „Annehmen“, Einkauf-/Lager-Notizen, Abschlussgründe, Anhänge, Begleitschein-PDF, Auswertung unter Berichte
+- **Stations-Chat** als eigenes Modul
+- **Kissen & Bettdecken** (Wäsche-Anfragen)
+
+### Geändert
+- Umbenennung in *OpenClinic*
+- UI-Redesign im Stil von Windows 11 Fluent
+
+### Sicherheit
+- IDOR-Prüfungen bei Einzelabruf, Begleitschein und Anhängen von Rücksendungen
+
+---
 
 ## [0.8.2] - 2026-05-12
 ### Neu

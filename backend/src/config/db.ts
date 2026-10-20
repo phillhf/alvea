@@ -11,9 +11,7 @@ function logWarn(msg: string) {
   try { require("./logger").migrateLogger.warn(msg); } catch { console.warn("[migrate]", msg); }
 }
 
-const DB_FILE = process.env.DB_FILE
-  ? path.resolve(process.env.DB_FILE)
-  : path.resolve(__dirname, "../../../data/openclinic.sqlite");
+import { DB_FILE } from "./paths";
 
 fs.mkdirSync(path.dirname(DB_FILE), { recursive: true });
 
@@ -490,7 +488,7 @@ const MIGRATIONS: Migration[] = [
         roleId, "Administrator", JSON.stringify(allPerms)
       );
       db.prepare(`INSERT INTO users (id,email,full_name,password_hash,pin_hash,active,role_id) VALUES (?,?,?,?,?,1,?)`).run(
-        userId, "admin@openclinic.local", "Administrator", hash,
+        userId, "admin@alvea.local", "Administrator", hash,
         bcryptjs.hashSync("1234", 10), roleId
       );
     } else {

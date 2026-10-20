@@ -1,388 +1,273 @@
-# 🛏️ OpenClinic
+<p align="center">
+  <img src="frontend/public/icons/icon-192.png" width="96" alt="Alvea">
+</p>
 
-> OpenClinic – Open-Source-Tool zur digitalen Verwaltung von Bettenaufbereitung und Entlassreinigung in Krankenhäusern und Pflegeeinrichtungen.
+<h1 align="center">Alvea</h1>
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Node.js](https://img.shields.io/badge/Node.js-24+LTS-brightgreen)](https://nodejs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)](https://www.typescriptlang.org/)
+<p align="center">
+  Digitale Krankenhaus-Logistik: Bettenaufbereitung, Zimmerreinigung, Sauerstoff, Rücksendungen, Wäsche, Spinde und Raumbuchung – in einer Web-App für PC, iPad und Smartphone.
+</p>
 
----
-
-## 📸 Screenshots
-
-| Stationsübersicht | Bett-Zentral | Dashboard |
-|---|---|---|
-| Prioritätsscore, farbige Sortierung | Board mit Filterleiste | Schichtleiter-Übersicht |
-
-> Screenshots werden nach dem ersten Produktiveinsatz ergänzt.
+<p align="center">
+  <a href="https://github.com/phillhf/alvea/releases/latest"><img src="https://img.shields.io/github/v/release/phillhf/alvea?label=Version" alt="Version"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/Lizenz-MIT-green.svg" alt="MIT"></a>
+  <img src="https://img.shields.io/badge/Windows%20Server-2019%2B-blue" alt="Windows Server">
+</p>
 
 ---
 
-## ✨ Features
+## Inhalt
 
-| Feature | Beschreibung |
+- [Funktionen](#funktionen)
+- [Installation](#installation)
+- [Update](#update)
+- [Umstieg von OpenClinic](#umstieg-von-openclinic)
+- [Erste Schritte](#erste-schritte)
+- [Rollen & Berechtigungen](#rollen--berechtigungen)
+- [Konfiguration](#konfiguration)
+- [Datensicherung](#datensicherung)
+- [Sicherheit](#sicherheit)
+- [Häufige Fragen](#häufige-fragen)
+- [Entwicklung](#entwicklung)
+- [Lizenz](#lizenz)
+
+---
+
+## Funktionen
+
+Alle Module lassen sich unter **Verwaltung → 🧩 Module** einzeln ein- und ausschalten. Die Navigation passt sich automatisch an.
+
+| Modul | Beschreibung |
 |---|---|
-| 🛏️ **Bett-Dezentral** | Aufträge auf Station – Normal- oder Infektiösmodus mit Erreger-Auswahl |
-| 🏥 **Bett-Zentral** | Zentrale Aufbereitung – eigene Aufbereitungsarten, Barcode-Pflicht, ISO-Flag |
-| 🧹 **Zimmerreinigung** | Standard- und Schlussdesinfektion mit Erreger-Auswahl |
-| ⚡ **Prioritätsscore** | Stationen automatisch nach Dringlichkeit sortiert und farbig hervorgehoben |
-| 📋 **Checklisten** | Vorlagen je Reinigungstyp und Bett-Typ |
-| 📸 **Foto-Dokumentation** | Fotos direkt per Kamera oder Galerie |
-| 🗺️ **Bett-Reisehistorie** | Alle Stationen und Zentralaufenthalte eines Betts per Strichcode |
-| 🏷️ **Barcode-Scanner** | ZXing-basierter Kamerascanner für Bett-Identifikation |
-| 📊 **Berichte & PDF** | Stationsbericht, Reisehistorie, Zentral-Tagesbericht – alle als PDF |
-| 🎨 **Design-Anpassung** | Farben, Schriften, Hintergrundbild, Login-Theme konfigurierbar |
-| 🔐 **Rollen & Bereiche** | Flexibles Berechtigungssystem mit 6 Permissions und Bereichs-Scope |
-| 🛡️ **Sicherheit** | JWT, bcrypt (Cost 12), Helmet, Rate-Limiting, Magic-Byte-Validierung |
+| 🛏️ **Bettenaufbereitung (dezentral)** | Aufträge auf Station, Transport-Flow (unterwegs → angekommen → in Bearbeitung), Normal- oder Infektiösmodus mit Erreger-Auswahl, Checklisten, Fotos, Prioritätsscore |
+| 🏥 **Bett-Zentral** | Zentrale Aufbereitung mit Barcode-Pflicht, ISO-Kennzeichnung und frei konfigurierbaren Desinfektionsmaßnahmen |
+| 🧹 **Scheuer-Wisch (Zimmerreinigung)** | Standardreinigung und Schlussdesinfektion mit Erreger-Auswahl |
+| 🔧 **Instandsetzung** | Defektmeldungen für Betten, Board-Ansicht, Bettenstamm mit Prüfterminen (P&W) |
+| 💨 **Sauerstofftransport** | Flaschenlogistik, Lagerbestand, Flaschentypen |
+| 📦 **Rücksendungen** | Station meldet → Lager → Einkauf → Abschluss, Begleitschein als PDF, Anhänge, Auswertung |
+| 🛏 **Kissen & Bettdecken** | Wäsche-Anfragen der Stationen |
+| 🔐 **Spindverwaltung** | Spinde, Anfragen, Vergabe und Historie |
+| 🪑 **Raumbuchung** | Gemeinsam genutzte Räume und Arbeitsplätze buchen, Stellvertretungen, Favoriten, Agenda |
+| 📢 **Meldungen** | Ankündigungen mit Gültigkeitszeitraum und Archiv |
+| 💬 **Stations-Chat** | Gemeinsamer Chat für alle Stationen |
+| 📊 **Berichte** | Stationsbericht, Bett-Reisehistorie, Zentral-Tagesbericht, Rücksendungen – jeweils als PDF |
+| 🗺️ **Raumbuch** | Haus → Gebäude → Station/Bereich → Raum → Stellplatz, inkl. Excel-Import |
+
+Außerdem: Rollen mit 22 Einzelberechtigungen und Bereichs-Scope, Barcode-Scanner per Kamera, Design-Anpassung (Farben, Schriften, Hintergrund), automatische Backups auf Netzlaufwerk, Audit-Log, Offline-Anzeige (PWA).
 
 ---
 
-## 🚀 Schnellstart (Windows Server)
+## Installation
 
-### Voraussetzung
+**Voraussetzungen:** Windows Server 2019 oder neuer (bzw. Windows 10/11, 64 Bit), Administratorrechte. Node.js oder andere Software wird **nicht** benötigt – alles ist im Setup enthalten.
 
-[Node.js 24 LTS](https://nodejs.org/) installieren → Next → Next → Finish.
+1. Neuestes **`Alvea-Setup-x.y.z.exe`** von der [Release-Seite](https://github.com/phillhf/alvea/releases/latest) herunterladen.
+2. Als Administrator ausführen. Der Assistent fragt:
+   - **Installationsordner** (Standard: `C:\Program Files\Alvea`)
+   - **Port** (Standard: `37843`)
+   - optional: Daten einer **bestehenden OpenClinic-Installation** übernehmen
+   - optional: Port in der **Windows-Firewall** freigeben
+3. Fertig. Alvea läuft als Windows-Dienst **„Alvea“** (startet automatisch mit dem Server) und ist erreichbar unter:
 
-### Erstinstallation
+```
+http://<Servername oder IP>:<Port>
+```
+
+**Erster Login:** `admin@alvea.local` / `admin123` – Passwort danach sofort unter *Profil* ändern.
+
+Im Startmenü unter **Alvea** gibt es Verknüpfungen zum Öffnen, zur Update-Suche, zur Konfiguration und zu den Protokollen.
+
+### Ordnerstruktur
+
+```
+C:\Program Files\Alvea\
+├── app\          Programmdateien (werden bei jedem Update ersetzt)
+├── node\         mitgelieferte Node.js-Laufzeit
+├── service\      Windows-Dienst (WinSW)
+├── data\         ← ALLE Daten: Datenbank, Uploads, Logs, Backups, Konfiguration
+│   ├── alvea.env
+│   ├── alvea.sqlite
+│   ├── uploads\
+│   ├── logs\
+│   └── backups\
+└── update.ps1
+```
+
+`data\` wird von Updates und auch von der Deinstallation **nie** gelöscht.
+
+### Unbeaufsichtigte Installation
 
 ```cmd
-REM ZIP entpacken, z.B. nach C:\Apps\openclinic\
-cd C:\Apps\openclinic
-install.bat
+Alvea-Setup-1.0.0.exe /VERYSILENT /DIR="D:\Alvea" /PORT=8080
 ```
-
-### Starten / Stoppen
-
-```cmd
-start.bat    ← Server starten
-stop.bat     ← Server stoppen
-```
-
-Das Terminal zeigt alle erreichbaren URLs:
-
-```
-Lokal:  http://localhost:37843
-LAN:    http://192.168.x.x:37843
-```
-
-📱 **iPad/Smartphone**: Gerät im gleichen WLAN → Browser → `http://<server-ip>:37843`
-
-> ⚠️ **Kamera & Barcode-Scanner** funktionieren auf iOS nur über HTTPS. Für den Produktiveinsatz wird ein Nginx-Reverse-Proxy mit selbstsigniertem Zertifikat empfohlen.
-
-### Als Windows-Dienst (Autostart)
-
-```cmd
-install-service.bat
-```
-
-### Update einspielen
-
-```cmd
-REM 1. Neues ZIP in den Ordner entpacken (Windows: Ja zu allen)
-REM 2. Dann:
-update.bat
-```
-
-Sichert automatisch Datenbank und Konfiguration, baut neu und migriert. **Daten bleiben immer erhalten.**
 
 ---
 
-## 🔑 Standard-Login (Erstinstallation)
+## Update
 
-> ⚠️ **Passwort nach dem ersten Login sofort unter Profil ändern!**
+Alvea aktualisiert sich direkt aus den [GitHub-Releases](https://github.com/phillhf/alvea/releases).
 
-| E-Mail | Passwort | PIN |
+**In der Weboberfläche:** *Verwaltung → ⬆️ Update* zeigt installierte und neueste Version samt Änderungen. **„Jetzt aktualisieren“** startet das Update; die Seite lädt sich nach 1–3 Minuten automatisch mit der neuen Version neu.
+
+**Auf dem Server:** Startmenü → *Alvea → Nach Updates suchen*.
+
+Ablauf eines Updates:
+
+1. Neuestes Release abfragen, Setup + SHA256-Prüfsumme herunterladen und prüfen
+2. Dienst stoppen, Datenbank nach `data\backups\vor-update-<Version>_<Zeit>\` sichern
+3. Setup unbeaufsichtigt ausführen (Port und Einstellungen bleiben erhalten)
+4. Dienst starten, Datenbank-Migrationen laufen automatisch
+5. Prüfen, ob die neue Version antwortet
+
+Protokoll: `data\logs\update.log`. Der Server braucht dafür Internetzugriff auf `api.github.com` und `github.com`. Ohne Internet: neues Setup manuell herunterladen und ausführen – das ist gleichwertig.
+
+---
+
+## Umstieg von OpenClinic
+
+Alvea ist der Nachfolger von *OpenClinic* (davor *Betten & Entlassreinigung*). Beim ersten Setup erkennt der Assistent eine laufende OpenClinic-Installation automatisch und schlägt deren Ordner vor. Übernommen werden:
+
+- die Datenbank (alle Aufträge, Nutzer, Einstellungen)
+- hochgeladene Fotos, Anhänge und Hintergrundbilder
+- der Anmeldeschlüssel (`JWT_SECRET`) – angemeldete Nutzer bleiben angemeldet
+
+Der alte Dienst wird gestoppt und **deaktiviert, aber nicht gelöscht**. Der alte Ordner bleibt unverändert. Wenn alles läuft, kann er später entfernt werden (`nssm remove OpenClinic confirm`, Ordner löschen).
+
+Hinweis: Ein unter *Verwaltung → 🎨 Design* gespeicherter App-Name „OpenClinic“ bleibt erhalten und muss dort ggf. angepasst werden. Der bisherige Admin-Login (`admin@openclinic.local`) gilt weiter.
+
+---
+
+## Erste Schritte
+
+Unter **Verwaltung** in dieser Reihenfolge:
+
+1. **Haus** und ggf. **Gebäude** anlegen
+2. **Stationen/Bereiche** anlegen
+3. **Räume** und **Stellplätze/Betten** anlegen – oder alles per **Excel-Import**
+4. **Rollen** prüfen bzw. anlegen
+5. **Mitarbeiter** anlegen und Stationen/Bereiche zuweisen
+6. Nicht benötigte **Module** deaktivieren
+
+---
+
+## Rollen & Berechtigungen
+
+Rollen werden frei unter *Benutzer & Rollen* konfiguriert. Jede Rolle erhält eine Auswahl dieser Berechtigungen:
+
+| Berechtigung | Zugriff |
+|---|---|
+| `bettenaufbereitung` | Bettenaufbereitung dezentral |
+| `bettenaufbereitung_zentral` | Bett-Zentral |
+| `zimmerreinigung` | Scheuer-Wisch |
+| `stationspersonal` | Meine Station (Aufträge, Rücksendungen, Anfragen der eigenen Station) |
+| `auftraege_erstellen` | Aufträge anlegen |
+| `dashboard` | Schichtleiter-Dashboard |
+| `berichte` | Berichte |
+| `betten_reparatur` | Instandsetzung |
+| `bettenstamm` | Bettenstamm |
+| `betten_pw` | Prüfung & Wartung |
+| `sauerstofftransport` | Sauerstofftransport |
+| `lager` | Lager (Rücksendungen, O₂-Lager) |
+| `waesche` | Kissen & Bettdecken |
+| `spindverwaltung` | Spindverwaltung |
+| `raumbuchung` | Räume/Arbeitsplätze buchen |
+| `raumbuchung_stellvertretung` | Für andere buchen (laut Stellvertretungs-Zuordnung) |
+| `raumbuchungsadmin` | Räume und Arbeitsplätze verwalten |
+| `meldungen` | Meldungen erstellen und bearbeiten |
+| `chat` | Stations-Chat |
+| `raumbuch` | Raumbuch bearbeiten |
+| `benutzerverwaltung` | Mitarbeiter, Rollen, Teams |
+| `verwaltung` | Vollzugriff Verwaltung (inkl. Update, Backup, Design) |
+
+**Sichtbarkeit (Scope):** Stationszuweisung → Bereichszuweisung → Team-Bereiche. Nutzer mit `verwaltung` sehen alles. Zentral-Aufträge sind für alle mit `bettenaufbereitung_zentral` sichtbar.
+
+---
+
+## Konfiguration
+
+Die Konfiguration steht in `data\alvea.env` (Startmenü → *Alvea → Konfiguration bearbeiten*). Nach Änderungen den Dienst **Alvea** neu starten (`services.msc` oder `net stop Alvea && net start Alvea`).
+
+| Schlüssel | Standard | Bedeutung |
 |---|---|---|
-| admin@openclinic.local | admin123 | 1234 |
+| `PORT` | `37843` | Port der Weboberfläche |
+| `HOST` | `0.0.0.0` | Netzwerk-Interface (`127.0.0.1` = nur lokal, z. B. hinter Reverse-Proxy) |
+| `JWT_SECRET` | zufällig | Signaturschlüssel für Logins – geheim halten |
+| `JWT_EXPIRES_IN` | `12h` | Gültigkeit einer Anmeldung |
+| `RETENTION_DAYS` | `90` | Abgeschlossene Aufträge, Audit-Log und Chat älter als N Tage werden gelöscht |
+| `CORS_ORIGIN` | – | Zusätzlich erlaubter Origin (nur bei Zugriff über andere Domain nötig) |
+| `DB_FILE`, `UPLOAD_DIR`, `LOG_DIR` | `data\…` | Datenpfade |
+| `LOG_LEVEL` | `info` | `debug`, `info`, `warn`, `error` |
+| `UPDATE_REPO` | `phillhf/alvea` | GitHub-Repository für Updates |
+
+Der Port lässt sich auch ändern, indem das Setup erneut ausgeführt wird.
 
 ---
 
-## 📱 Navigation
+## Datensicherung
 
-Die App hat fünf Haupt-Reiter – welche sichtbar sind, hängt von den Berechtigungen ab:
+Alle Daten liegen in `data\`. Die Datenbank ist **eine** Datei (`alvea.sqlite`).
 
-| Reiter | Berechtigung | Zweck |
-|---|---|---|
-| **Bett-Dezentral** | `bettenaufbereitung` | Bettenaufbereitung auf den Stationen |
-| **Bett-Zentral** | `bettenaufbereitung_zentral` | Zentrale Aufbereitung im Aufbereitungsraum |
-| **Zimmerreinigung** | `zimmerreinigung` | Entlassreinigung und Schlussdesinfektion |
-| **Berichte** | `berichte` | Tagesberichte und Reisehistorie |
-| **Verwaltung** | `verwaltung` | Vollständige Administration |
+- **Automatisch:** *Verwaltung → 💾 Backup* – tägliche Kopie auf ein lokales Verzeichnis oder eine Netzwerkfreigabe (UNC, optional mit Anmeldedaten).
+- **Vor jedem Update:** automatisch nach `data\backups\`.
+- **Manuell:** Dienst stoppen, `data\` kopieren.
 
 ---
 
-## 🛏️ Bett-Dezentral
-
-### Workflow
-
-```
-Schichtleiter legt Auftrag an (Bett + Reinigungsart)
-    ↓
-Auftrag erscheint auf der Stationsübersicht
-    ↓
-Mitarbeiter: "Auf dem Weg" → unterwegs
-    ↓
-Mitarbeiter: "Angekommen" → Barcode scannen (optional)
-    ↓
-Reinigung + Checkliste + Fotos → abschließen
-```
-
-### Auftrag anlegen
-
-1. **Bett-Dezentral** → Station wählen → **+ Auftrag anlegen**
-2. Bett auswählen
-3. Reinigungsart: **Normal** oder **Infektiös** (Erreger-Auswahl bei Infektiös Pflicht)
-4. Speichern
-
-### Prioritätsscore
-
-- Jeder offene Auftrag = **1 Punkt**
-- Aufträge > 30 Min alt = **+1,5 Punkte** (konfigurierbar)
-- Farbschwellen: grün / gelb / rot (konfigurierbar unter Verwaltung → Einstellungen)
-- Höchster Score je Bereich: **rote Umrandung**
-
----
-
-## 🏥 Bett-Zentral
-
-Die zentrale Bettenaufbereitung empfängt Betten aus dem ganzen Haus und bereitet diese in einem Zentralraum auf.
-
-### Unterschied zur dezentralen Aufbereitung
-
-| | Dezentral | Zentral |
-|---|---|---|
-| Auftrag erstellt von | Schichtleiter | Mitarbeiter der Aufbereitung |
-| Transport-Flow | Ja (unterwegs → angekommen) | Nein (direkt laufend) |
-| Barcode | Optional beim Reinigen | **Pflicht beim Anlegen** |
-| Verfahren | Normal / Infektiös | Frei konfigurierbare Aufbereitungsarten |
-| ISO-Kennzeichnung | Nein | Ja |
-
-### Auftrag anlegen (5 Schritte)
-
-1. **Barcode** – eingeben, aus Liste wählen oder mit Kamera scannen *(Pflicht)*
-2. **Bett-Typ** – welcher Bett-Typ wird aufbereitet?
-3. **ISO-Bett** – Isolations-Bett ja/nein
-4. **Erreger** – bekannte Erreger optional angeben
-5. **Aufbereitungsart** – Verfahren wählen (konfigurierbar unter Verwaltung)
-
-### Aufbereitungsarten verwalten
-
-**Verwaltung → Aufbereitungsarten**:
-
-| Feld | Bedeutung |
-|---|---|
-| **Name** | Bezeichnung (z. B. „RKI-Klasse B") |
-| **Wann anwenden?** | Hilfetext beim Anlegen (z. B. „Bei MRSA-Betten") |
-| **Anleitung** | Vollständige Schritt-für-Schritt-Anweisung – wird beim Auftrag angezeigt |
-| **Reihenfolge** | Sortierung in der Auswahl |
-| **Aktiv** | Inaktive Arten erscheinen nicht beim Anlegen |
-
----
-
-## 🧹 Zimmerreinigung
-
-### Reinigungsarten
-
-- 🧹 **Standardreinigung** – reguläre Zimmerreinigung
-- 🔴 **Schlussdesinfektion** – nach Entlassung/Isolationsende; Erreger können angegeben werden
-
-### Auftrag anlegen
-
-1. **Zimmerreinigung** → Station wählen → **+ Zimmerreinigung anlegen**
-2. Zimmer auswählen
-3. Reinigungsart wählen (bei Schlussdesinfektion optional Erreger angeben)
-4. Speichern
-
----
-
-## 📊 Berichte
-
-### Stationsbericht
-
-Tages- oder Zeitraumbericht für eine Station.
-→ **PDF-Export** verfügbar
-
-### Bett-Reisehistorie
-
-Alle Stationen und Zentralaufenthalte eines Betts über seinen Barcode.
-- Zentralaufenthalte erscheinen als Station **„Bettenzentrale"**
-- Statistik: Wie oft war das Bett auf welcher Station?
-→ **PDF-Export** verfügbar
-
-### Bett-Zentral Tagesbericht
-
-- Gesamtkennzahlen: Gesamt / Abgeschlossen / Offen / ISO-Betten
-- Verteilung nach Bett-Typ und Aufbereitungsart
-- Tagesansicht aufklappbar
-→ **Gesamt-PDF** und **📄 Tages-PDF** je Tag verfügbar
-
----
-
-## 🔐 Rollen & Berechtigungen
-
-Unter **Verwaltung → 🔐 Rollen** Rollen anlegen und Permissions zuweisen.
-
-### 6 Berechtigungen
-
-| Permission | Funktion |
-|---|---|
-| `bettenaufbereitung` | Reiter Bett-Dezentral |
-| `bettenaufbereitung_zentral` | Reiter Bett-Zentral |
-| `zimmerreinigung` | Reiter Zimmerreinigung |
-| `berichte` | Reiter Berichte |
-| `auftraege_erstellen` | Aufträge anlegen, Zimmer/Betten verwalten |
-| `verwaltung` | Vollzugriff Verwaltung |
-
-### Scope – wer sieht was?
-
-1. **Stationszuweisung** (höchste Priorität) – nur diese Stationen
-2. **Bereichszuweisung** – nur diese Bereiche
-3. **Team-Bereiche** – Bereiche des Teams
-4. Verwaltung-Permission → alles sichtbar
-
-Zentral-Aufträge haben **keinen Bereichs-Scope** – für alle mit `bettenaufbereitung_zentral` sichtbar.
-
-### Typische Rollenkonfiguration
-
-| Rolle | Permissions |
-|---|---|
-| Reiniger Dezentral | `bettenaufbereitung` |
-| Reiniger Zentral | `bettenaufbereitung_zentral` |
-| Zimmerreinigung | `zimmerreinigung` |
-| Schichtleiter | alle außer `verwaltung` |
-| Admin | alle 6 |
-
----
-
-## ⚙️ Verwaltung – 13 Tabs
-
-| Tab | Inhalt |
-|---|---|
-| 🔐 **Rollen** | Rollen + Permissions zuweisen |
-| **Teams** | Teams + Bereichszuweisung |
-| **Häuser** | Standorte |
-| **Bereiche** | Abteilungen / Gebäudebereiche |
-| **Stationen** | Pflegestationen |
-| **Zimmer** | Zimmer je Station |
-| **Betten** | Betten + 🗺️ Reisehistorie-Modal |
-| **Bett-Typen** | Bett-Typen (Standard, Intensiv …) |
-| **Krankheitserreger** | Erreger mit Desinfektionsmittel-Info |
-| **Strichcodes** | Barcode-Pool + CSV/XLS-Import |
-| **Aufbereitungsarten** | Verfahren für Bett-Zentral |
-| **Anleitungen** | Allgemeine Reinigungsanleitungen |
-| ⚙️ **Einstellungen** | Prioritätsscore, Farbschwellen, Datenhaltung |
-| 🎨 **Design** | App-Theme, Login-Theme, Hintergrundbild |
-
----
-
-## 💾 Datensicherung
-
-Die gesamte Datenbank ist eine einzige Datei:
-
-```
-data/openclinic.sqlite
-```
-
-**Manuell**: Datei kopieren – fertig.
-
-**Automatisch**: `update.bat` sichert vor jedem Update:
-
-```
-..\betten-backup-YYYYMMDD_HHMMSS\
-    openclinic.sqlite
-    .env
-```
-
-Alte Daten werden nach `RETENTION_DAYS` (Standard: 90 Tage) automatisch gelöscht.
-
----
-
-## ⚙️ Konfiguration (.env)
-
-Wird bei `install.bat` automatisch angelegt:
-
-```env
-NODE_ENV=production
-PORT=37843
-HOST=0.0.0.0
-DB_FILE=./data/openclinic.sqlite
-UPLOAD_DIR=./uploads
-JWT_SECRET=<zufällig generiert, ≥32 Zeichen>
-JWT_EXPIRES_IN=12h
-CORS_ORIGIN=          # Leer = nur Localhost
-RETENTION_DAYS=90
-```
-
----
-
-## 🔒 Sicherheitsmaßnahmen
+## Sicherheit
 
 | Maßnahme | Details |
 |---|---|
-| Passwort-Hashing | bcrypt, Cost-Factor 12 |
-| Tokens | JWT mit zufälligem Secret |
-| Rate-Limiting | Login 10/15min · API 300/min · PW-Änderung 5/15min |
-| Security-Header | Helmet (CSP, HSTS, X-Frame-Options …) |
-| Upload-Validierung | MIME-Typ + Magic-Bytes (JPEG/PNG/WebP/GIF) |
-| Path-Traversal-Schutz | path.resolve-Prüfung |
-| IDOR-Schutz | Bereichs-Scope-Check auf Tasks, Fotos, Checklisten |
-| Audit-Log | Alle Änderungen protokolliert |
+| Passwörter | bcrypt, Cost-Factor 12 |
+| Anmeldung | JWT mit zufälligem 384-Bit-Secret |
+| Rate-Limiting | Login 10/15 min · API 300/min · Passwortänderung 5/15 min |
+| HTTP-Header | Helmet (CSP, X-Frame-Options, …) |
+| Uploads | MIME-Typ + Magic-Bytes, serverseitige Dateinamen, Pfad-Prüfung |
+| Zugriffsschutz | Bereichs-Scope und Besitzer-Prüfung auf Einzelabrufen (IDOR-Schutz) |
+| Audit-Log | Änderungen werden protokolliert (ohne Passwörter) |
+| Updates | SHA256-geprüfte Setups aus GitHub-Releases |
+
+Alvea ist für den Betrieb im internen Klinik-Netz gedacht und spricht standardmäßig HTTP. Für Kamera/Barcode-Scanner auf iOS ist HTTPS nötig – dafür einen Reverse-Proxy (z. B. IIS mit ARR, nginx oder Caddy) mit Zertifikat vorschalten und `HOST=127.0.0.1` setzen.
+
+Sicherheitslücken bitte nicht öffentlich als Issue melden, sondern über [GitHub Security Advisories](https://github.com/phillhf/alvea/security/advisories/new).
 
 ---
 
-## ❓ Häufige Fragen
+## Häufige Fragen
 
-**Kamera/Scanner funktioniert nicht auf dem iPad?**
-Kamera und Scanner benötigen HTTPS. Im lokalen Netzwerk einen Nginx-Reverse-Proxy mit selbstsigniertem Zertifikat einrichten.
+**Alvea ist nach der Installation nicht erreichbar.**
+Dienst „Alvea“ in `services.msc` prüfen, Protokolle unter `data\logs\` ansehen. Von anderen Geräten aus: Firewall-Freigabe für den Port prüfen.
 
-**Ein Mitarbeiter sieht keine Aufträge?**
-Unter Verwaltung → Benutzer prüfen ob der Nutzer einem Bereich, einer Station oder einem Team zugewiesen ist und ob die Rolle die nötigen Permissions hat.
+**Kamera/Scanner funktioniert auf dem iPad nicht.**
+iOS erlaubt Kamerazugriff nur über HTTPS – siehe [Sicherheit](#sicherheit). Ohne HTTPS fällt Alvea auf die native Kamera-App zurück.
 
-**Wie importiere ich Barcodes?**
-Verwaltung → Strichcodes → CSV oder XLS hochladen. Format: Spalte `code`, optionale Spalte `description`.
+**Ein Mitarbeiter sieht keine Aufträge.**
+Rolle (Berechtigungen) und Zuweisung zu Station, Bereich oder Team prüfen. Danach ab- und wieder anmelden.
 
-**Wie ändere ich das Logo oder Hintergrundbild?**
-Verwaltung → 🎨 Design → Hintergrundbild hochladen. Farben und Schriften ebenfalls dort konfigurierbar.
+**Wie importiere ich das Raumbuch?**
+*Verwaltung → Import* – Excel-Datei hochladen. Spalten u. a. Haus, Gebäude, Station, Raum, Stellplatz bzw. Stellplatz-Anzahl.
 
-**Wie lege ich eine neue Aufbereitungsart an?**
-Verwaltung → Aufbereitungsarten → Name, „Wann anwenden?" und Anleitung eingeben. Die Anleitung erscheint dem Mitarbeiter direkt beim Auftrag.
-
-**Wie oft werden alte Daten gelöscht?**
-Nach `RETENTION_DAYS` (Standard: 90 Tage) – einstellbar in `backend/.env`.
-
-**Neuer Mitarbeiter sieht den Tab Bett-Zentral nicht?**
-Unter Verwaltung → Rollen → Rolle des Mitarbeiters bearbeiten → Permission `bettenaufbereitung_zentral` aktivieren. Dann abmelden und neu anmelden.
+**Update in der Verwaltung meldet „Update-Prüfung nicht möglich“.**
+Der Server erreicht GitHub nicht (Proxy/Firewall). Setup manuell herunterladen und ausführen.
 
 ---
 
-## 🏗️ Tech-Stack
+## Entwicklung
 
-| Bereich | Technologie |
-|---|---|
-| Frontend | React 18, Vite, TypeScript, Tailwind CSS, i18next |
-| Backend | Node.js 24 LTS, Express, TypeScript, Zod |
-| Datenbank | SQLite (better-sqlite3, WAL-Mode) |
-| Auth | JWT + bcrypt (Cost 12) |
-| PDF | PDFKit |
-| Excel-Import | ExcelJS (MIT) |
-| Barcode | @zxing/browser + @zxing/library |
+Voraussetzung: Node.js 24.
 
----
+```bash
+cd backend && npm install && cp .env.example .env && npm run init-db && npm run dev
+cd frontend && npm install && npm run dev
+```
 
-## 🤝 Beitragen
+Das Frontend läuft dann unter `http://localhost:5173` und leitet `/api` an das Backend (Port 37843) weiter.
 
-Pull Requests sind willkommen!
+Architektur, Datenbank-Regeln und Release-Ablauf: [docs/ENTWICKLUNG.md](docs/ENTWICKLUNG.md).
 
-1. Fork erstellen
-2. Feature-Branch anlegen (`git checkout -b feature/mein-feature`)
-3. Änderungen committen
-4. Branch pushen
-5. Pull Request öffnen
+Beiträge sind willkommen – bitte vorher ein Issue eröffnen, damit wir die Umsetzung abstimmen können.
 
 ---
 
-## 📄 Lizenz
+## Lizenz
 
-Dieses Projekt steht unter der **MIT-Lizenz** – siehe [LICENSE](LICENSE).
-
-Verwendete Drittanbieter-Komponenten sind in [NOTICE](NOTICE) aufgeführt.
+[MIT](LICENSE). Verwendete Drittanbieter-Komponenten (u. a. Node.js und WinSW im Installer) sind in [NOTICE](NOTICE) aufgeführt.
